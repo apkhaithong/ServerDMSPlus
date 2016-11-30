@@ -63,6 +63,11 @@ object WebModule1: TWebModule1
       OnAction = WebModule1saveOneAction
     end
     item
+      Name = 'delete'
+      PathInfo = '/delete'
+      OnAction = WebModule1deleteAction
+    end
+    item
       Default = True
       Name = 'login'
       PathInfo = '/login'

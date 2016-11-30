@@ -84,6 +84,8 @@ type
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure WebModule1saveOneAction(Sender: TObject; Request: TWebRequest;
       Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1deleteAction(Sender: TObject; Request: TWebRequest;
+      Response: TWebResponse; var Handled: Boolean);
   private
     { Private declarations }
     XSchema : string;
@@ -481,6 +483,66 @@ begin
   begin
     Response.StatusCode := 400;
     Response.SendResponse;
+  end;
+end;
+
+procedure TWebModule1.WebModule1deleteAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var ja, LJsonArr : TJSONArray;
+    jo, RequestObject : TJSONObject;
+    table, field, key, Return :string;
+    I : Integer;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    //Convert Content to JSON Array
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Loop Reading JSON Array
+    Form1.Memo1.Lines.Clear;
+    for I := 0 to LJsonArr.Count-1 do
+    begin
+      RequestObject := LJsonArr.Items[I] as TJSONObject;
+      table  := RequestObject.GetValue('table').Value;
+      field  := RequestObject.GetValue('field').Value;
+      key    := RequestObject.GetValue('key').Value;
+
+      with QPost do
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Add('SELECT * FROM '+table+' WHERE '+field+' =:V1 ');
+        Params.ParamByName('V1').AsString := key;
+        Open;
+        Delete;
+      end;
+      //StartTransaction
+      QPost.Transaction.StartTransaction;
+      try
+        QPost.ApplyUpdates();
+        QPost.Transaction.Commit;
+      finally
+        if QPost.Transaction.Active then
+        begin
+          Return := 'false';
+          QPost.Transaction.Rollback;
+        end
+        else
+        begin
+          Return := 'true';
+        end;
+      end;
+      if Return = 'false' then
+        break;
+    end;
+
+    //Response Data
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := Return;
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
   end;
 end;
 
