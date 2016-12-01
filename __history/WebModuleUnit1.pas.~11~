@@ -71,9 +71,9 @@ type
     set_setbank: TPageProducer;
     set_bankbook: TPageProducer;
     set_rtchq: TPageProducer;
-    set_paydue: TPageProducer;
-    set_setacti: TPageProducer;
-    set_setreson: TPageProducer;
+    PageProducer1: TPageProducer;
+    PageProducer2: TPageProducer;
+    PageProducer3: TPageProducer;
     PageProducer4: TPageProducer;
     PageProducer5: TPageProducer;
     PageProducer6: TPageProducer;

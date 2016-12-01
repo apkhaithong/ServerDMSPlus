@@ -66,18 +66,6 @@ type
     set_typlost: TPageProducer;
     set_setaump: TPageProducer;
     set_setprov: TPageProducer;
-    set_paytyp: TPageProducer;
-    set_payfor: TPageProducer;
-    set_setbank: TPageProducer;
-    set_bankbook: TPageProducer;
-    set_rtchq: TPageProducer;
-    set_paydue: TPageProducer;
-    set_setacti: TPageProducer;
-    set_setreson: TPageProducer;
-    PageProducer4: TPageProducer;
-    PageProducer5: TPageProducer;
-    PageProducer6: TPageProducer;
-    PageProducer7: TPageProducer;
     PageProducer8: TPageProducer;
     PageProducer9: TPageProducer;
     PageProducer10: TPageProducer;

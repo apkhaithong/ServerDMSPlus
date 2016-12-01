@@ -52,6 +52,25 @@ type
     set_setgroup: TPageProducer;
     set_setcolor: TPageProducer;
     DataSource1: TDataSource;
+    set_regflag: TPageProducer;
+    set_optmast: TPageProducer;
+    set_optmastlocat: TPageProducer;
+    set_setmod: TPageProducer;
+    set_modmast: TPageProducer;
+    set_setfleet: TPageProducer;
+    set_bookingstatus: TPageProducer;
+    PageProducer1: TPageProducer;
+    PageProducer2: TPageProducer;
+    PageProducer3: TPageProducer;
+    PageProducer4: TPageProducer;
+    PageProducer5: TPageProducer;
+    PageProducer6: TPageProducer;
+    PageProducer7: TPageProducer;
+    PageProducer8: TPageProducer;
+    PageProducer9: TPageProducer;
+    PageProducer10: TPageProducer;
+    PageProducer11: TPageProducer;
+    PageProducer12: TPageProducer;
     procedure DSServerClass1GetClass(DSServerClass: TDSServerClass;
       var PersistentClass: TPersistentClass);
     procedure ServerFunctionInvokerHTMLTag(Sender: TObject; Tag: TTag;
@@ -83,6 +102,8 @@ type
     procedure WebModule1duplicateCheckAction(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure WebModule1saveOneAction(Sender: TObject; Request: TWebRequest;
+      Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1deleteAction(Sender: TObject; Request: TWebRequest;
       Response: TWebResponse; var Handled: Boolean);
   private
     { Private declarations }
@@ -481,6 +502,66 @@ begin
   begin
     Response.StatusCode := 400;
     Response.SendResponse;
+  end;
+end;
+
+procedure TWebModule1.WebModule1deleteAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var ja, LJsonArr : TJSONArray;
+    jo, RequestObject : TJSONObject;
+    table, field, key, Return :string;
+    I : Integer;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    //Convert Content to JSON Array
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Loop Reading JSON Array
+    Form1.Memo1.Lines.Clear;
+    for I := 0 to LJsonArr.Count-1 do
+    begin
+      RequestObject := LJsonArr.Items[I] as TJSONObject;
+      table  := RequestObject.GetValue('table').Value;
+      field  := RequestObject.GetValue('field').Value;
+      key    := RequestObject.GetValue('key').Value;
+
+      with QPost do
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Add('SELECT * FROM '+table+' WHERE '+field+' =:V1 ');
+        Params.ParamByName('V1').AsString := key;
+        Open;
+        Delete;
+      end;
+      //StartTransaction
+      QPost.Transaction.StartTransaction;
+      try
+        QPost.ApplyUpdates();
+        QPost.Transaction.Commit;
+      finally
+        if QPost.Transaction.Active then
+        begin
+          Return := 'false';
+          QPost.Transaction.Rollback;
+        end
+        else
+        begin
+          Return := 'true';
+        end;
+      end;
+      if Return = 'false' then
+        break;
+    end;
+
+    //Response Data
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := Return;
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
   end;
 end;
 
