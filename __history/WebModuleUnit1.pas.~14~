@@ -52,6 +52,37 @@ type
     set_setgroup: TPageProducer;
     set_setcolor: TPageProducer;
     DataSource1: TDataSource;
+    set_regflag: TPageProducer;
+    set_optmast: TPageProducer;
+    set_optmastlocat: TPageProducer;
+    set_setmod: TPageProducer;
+    set_modmast: TPageProducer;
+    set_setfleet: TPageProducer;
+    set_bookingstatus: TPageProducer;
+    set_typcont: TPageProducer;
+    set_typhold: TPageProducer;
+    set_argroup: TPageProducer;
+    set_setgrade: TPageProducer;
+    set_typlost: TPageProducer;
+    set_setaump: TPageProducer;
+    set_setprov: TPageProducer;
+    set_paytyp: TPageProducer;
+    set_payfor: TPageProducer;
+    set_setbank: TPageProducer;
+    set_bankbook: TPageProducer;
+    set_rtchq: TPageProducer;
+    set_paydue: TPageProducer;
+    set_setacti: TPageProducer;
+    set_setreson: TPageProducer;
+    PageProducer4: TPageProducer;
+    PageProducer5: TPageProducer;
+    PageProducer6: TPageProducer;
+    PageProducer7: TPageProducer;
+    PageProducer8: TPageProducer;
+    PageProducer9: TPageProducer;
+    PageProducer10: TPageProducer;
+    PageProducer11: TPageProducer;
+    PageProducer12: TPageProducer;
     procedure DSServerClass1GetClass(DSServerClass: TDSServerClass;
       var PersistentClass: TPersistentClass);
     procedure ServerFunctionInvokerHTMLTag(Sender: TObject; Tag: TTag;
@@ -85,6 +116,8 @@ type
     procedure WebModule1saveOneAction(Sender: TObject; Request: TWebRequest;
       Response: TWebResponse; var Handled: Boolean);
     procedure WebModule1deleteAction(Sender: TObject; Request: TWebRequest;
+      Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1saveAllAction(Sender: TObject; Request: TWebRequest;
       Response: TWebResponse; var Handled: Boolean);
   private
     { Private declarations }
@@ -621,6 +654,107 @@ begin
     begin
       Response.Content := Page404.Content;
     end;
+  end;
+end;
+
+procedure TWebModule1.WebModule1saveAllAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var ja, LJsonArr : TJSONArray;
+    jo, RequestObject : TJSONObject;
+    status, table, field, key, value, Return :string;
+    I : integer;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    Form1.Memo1.Lines.Clear;
+    for I := 0 to LJsonArr.Count-1 do
+    begin
+      RequestObject := LJsonArr.Items[I] as TJSONObject;
+      if (I = 0) then
+      begin
+        status := RequestObject.GetValue('status').Value;
+        field  := RequestObject.GetValue('field').Value;
+        key    := RequestObject.GetValue('key').Value;
+        if (status = 'insert') then
+        begin
+          with QGet do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('SELECT NAME FROM SYSIBM.SYSCOLUMNS WHERE TBNAME =:V1 AND TBCREATOR =:V2 AND KEYSEQ = ''1'' ');
+            ParamByName('V1').AsString := table;
+            ParamByName('V2').AsString := UpperCase(XSchema);
+            Open;
+          end;
+
+          with QPost do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('SELECT * FROM '+table+' WHERE '+QGet.FieldByName('NAME').AsString+' IS NULL ');
+            Open;
+            Insert;
+          end;
+
+          //Convert data to record
+          TConverter.New.JSON.Source(ja).ToDataSet(QPost);
+        end
+        else
+        begin
+          with QPost do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('SELECT * FROM '+table+' WHERE '+field+' =:V1 ');
+            Params.ParamByName('V1').AsString := key;
+            Open;
+            Edit;
+          end;
+
+          //Convert data to record
+          TConverter.New.JSON.Source(ja).ToRecord(QPost);
+        end;
+      end;
+      table  := RequestObject.GetValue('table').Value;
+      value  := RequestObject.GetValue('value').ToJSON;
+      ja     := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+
+      Form1.Memo1.Lines.Add('table : '+table);
+      Form1.Memo1.Lines.Add('value : '+value);
+    end;
+
+
+
+//
+//    //StartTransaction
+//    QPost.Edit;
+//    QPost.Transaction.StartTransaction;
+//    try
+//      QPost.Post;
+//      QPost.ApplyUpdates();
+//      QPost.Transaction.Commit;
+//    finally
+//      if QPost.Transaction.Active then
+//      begin
+//        Return := 'false';
+//        QPost.Transaction.Rollback;
+//      end
+//      else
+//      begin
+//        Return := 'true';
+//      end;
+//    end;
+
+    //Response Data
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := Return;
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
   end;
 end;
 

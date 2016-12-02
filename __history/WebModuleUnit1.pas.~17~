@@ -662,7 +662,7 @@ end;
 procedure TWebModule1.WebModule1saveAllAction(Sender: TObject;
   Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
 var ja, LJsonArr : TJSONArray;
-    jo, RqObjectMaster, RqObjectTran : TJSONObject;
+    jo, RequestObject : TJSONObject;
     status, table, field, key, value, Return :string;
     I, J : integer;
 begin
@@ -674,15 +674,15 @@ begin
     Form1.Memo1.Lines.Clear;
     for I := 0 to LJsonArr.Count-1 do
     begin
-      RqObjectMaster := LJsonArr.Items[I] as TJSONObject;
-      table  := RqObjectMaster.GetValue('table').Value;
-      value  := RqObjectMaster.GetValue('value').ToJSON;
+      RequestObject := LJsonArr.Items[I] as TJSONObject;
+      table  := RequestObject.GetValue('table').Value;
+      value  := RequestObject.GetValue('value').ToJSON;
       ja     := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
       if (I = 0) then
       begin
-        status := RqObjectMaster.GetValue('status').Value;
-        field  := RqObjectMaster.GetValue('field').Value;
-        key    := RqObjectMaster.GetValue('key').Value;
+        status := RequestObject.GetValue('status').Value;
+        field  := RequestObject.GetValue('field').Value;
+        key    := RequestObject.GetValue('key').Value;
         if (status = 'insert') then
         begin
           with QGet do
@@ -727,11 +727,7 @@ begin
       begin
         for J := 0 to ja.Count-1 do
         begin
-          RqObjectTran := ja.Items[J] as TJSONObject;
-          //Form1.Memo1.Lines.Add('value : '+ja.Items[J].ToJSON);
-          Form1.Memo1.Lines.Add('IDNO : '+RqObjectTran.GetValue('IDNO').Value);
-          Form1.Memo1.Lines.Add('MODELCOD : '+RqObjectTran.GetValue('MODELCOD').Value);
-          Form1.Memo1.Lines.Add('BAABCOD : '+RqObjectTran.GetValue('BAABCOD').Value);
+          Form1.Memo1.Lines.Add('value : '+ja.Items[J].ToJSON);
         end;
       end;
     end;

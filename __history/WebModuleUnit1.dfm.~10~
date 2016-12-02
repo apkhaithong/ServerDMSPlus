@@ -132,10 +132,120 @@ object WebModule1: TWebModule1
       Name = 'set_setgroup'
       PathInfo = '/set_setgroup'
       Producer = set_setgroup
+    end
+    item
+      Name = 'set_regflag'
+      PathInfo = '/set_regflag'
+      Producer = set_regflag
+    end
+    item
+      Name = 'set_optmast'
+      PathInfo = '/set_optmast'
+      Producer = set_optmast
+    end
+    item
+      Name = 'set_optmastlocat'
+      PathInfo = '/set_optmastlocat'
+      Producer = set_optmastlocat
+    end
+    item
+      Name = 'set_setmod'
+      PathInfo = '/set_setmod'
+      Producer = set_setmod
+    end
+    item
+      Name = 'set_modmast'
+      PathInfo = '/set_modmast'
+      Producer = set_modmast
+    end
+    item
+      Name = 'set_setfleet'
+      PathInfo = '/set_setfleet'
+      Producer = set_setfleet
+    end
+    item
+      Name = 'set_bookingstatus'
+      PathInfo = '/set_bookingstatus'
+      Producer = set_bookingstatus
+    end
+    item
+      Name = 'set_typcont'
+      PathInfo = '/set_typcont'
+      Producer = set_typcont
+    end
+    item
+      Name = 'set_typhold'
+      PathInfo = '/set_typhold'
+      Producer = set_typhold
+    end
+    item
+      Name = 'set_argroup'
+      PathInfo = '/set_argroup'
+      Producer = set_argroup
+    end
+    item
+      Name = 'set_typlost'
+      PathInfo = '/set_typlost'
+      Producer = set_typlost
+    end
+    item
+      Name = 'set_setgrade'
+      PathInfo = '/set_setgrade'
+      Producer = set_setgrade
+    end
+    item
+      Name = 'set_setaump'
+      PathInfo = '/set_setaump'
+      Producer = set_setaump
+    end
+    item
+      Name = 'set_setprov'
+      PathInfo = '/set_setprov'
+      Producer = set_setprov
+    end
+    item
+      Name = 'set_paytyp'
+      PathInfo = '/set_paytyp'
+      Producer = set_paytyp
+    end
+    item
+      Name = 'set_payfor'
+      PathInfo = '/set_payfor'
+      Producer = set_payfor
+    end
+    item
+      Name = 'set_setbank'
+      PathInfo = '/set_setbank'
+      Producer = set_setbank
+    end
+    item
+      Name = 'set_bankbook'
+      PathInfo = '/set_bankbook'
+      Producer = set_bankbook
+    end
+    item
+      Name = 'set_rtchq'
+      PathInfo = '/set_rtchq'
+      Producer = set_rtchq
+    end
+    item
+      Name = 'set_paydue'
+      PathInfo = '/set_paydue'
+      Producer = set_paydue
+    end
+    item
+      Name = 'set_setacti'
+      PathInfo = '/set_setacti'
+      Producer = set_setacti
+    end
+    item
+      Name = 'set_setreson'
+      PathInfo = '/set_setreson'
+      Producer = set_setreson
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 589
-  Width = 823
+  Width = 1052
   object DSServer1: TDSServer
     Left = 64
     Top = 11
@@ -260,7 +370,7 @@ object WebModule1: TWebModule1
   end
   object UniTransaction1: TUniTransaction
     DefaultConnection = UniConnection1
-    Left = 624
+    Left = 701
     Top = 16
   end
   object QGet: TUniQuery
@@ -297,8 +407,8 @@ object WebModule1: TWebModule1
       'end.')
     ShowProgress = False
     OnGetValue = frxReport1GetValue
-    Left = 624
-    Top = 72
+    Left = 877
+    Top = 16
     Datasets = <
       item
         DataSet = frxReport1.UniDACQuery1
@@ -781,13 +891,13 @@ object WebModule1: TWebModule1
   end
   object frxUniDACComponents1: TfrxUniDACComponents
     DefaultDatabase = UniConnection1
-    Left = 624
-    Top = 128
+    Left = 701
+    Top = 72
   end
   object frxUserDataSet1: TfrxUserDataSet
     UserName = 'frxUserDataSet1'
-    Left = 624
-    Top = 192
+    Left = 877
+    Top = 72
   end
   object frxXLSXExport1: TfrxXLSXExport
     ShowDialog = False
@@ -798,16 +908,16 @@ object WebModule1: TWebModule1
     ChunkSize = 0
     PictureType = gpPNG
     Wysiwyg = False
-    Left = 728
-    Top = 192
+    Left = 981
+    Top = 72
   end
   object frxDBDataset1: TfrxDBDataset
     UserName = 'frxDBDataset1'
     CloseDataSource = False
     DataSet = QGet
     BCDToCurrency = False
-    Left = 728
-    Top = 136
+    Left = 805
+    Top = 72
   end
   object frxPDFExport1: TfrxPDFExport
     ShowDialog = False
@@ -832,8 +942,8 @@ object WebModule1: TWebModule1
     CenterWindow = False
     PrintScaling = False
     PdfA = False
-    Left = 728
-    Top = 80
+    Left = 981
+    Top = 16
   end
   object frxDesigner1: TfrxDesigner
     DefaultScriptLanguage = 'PascalScript'
@@ -854,7 +964,7 @@ object WebModule1: TWebModule1
     Restrictions = []
     RTLLanguage = False
     MemoParentFont = False
-    Left = 728
+    Left = 805
     Top = 16
   end
   object Page404: TPageProducer
@@ -864,33 +974,33 @@ object WebModule1: TWebModule1
   end
   object stk_onhand: TPageProducer
     HTMLFile = 'templates\stk_onhand.html'
-    Left = 64
-    Top = 272
+    Left = 48
+    Top = 400
   end
   object sale_customer: TPageProducer
     HTMLFile = 'templates\sale_customer.html'
-    Left = 64
-    Top = 336
+    Left = 48
+    Top = 464
   end
   object sale_prospect: TPageProducer
     HTMLFile = 'templates\sale_prospect.html'
-    Left = 152
-    Top = 336
+    Left = 136
+    Top = 464
   end
   object stk_onhanddate: TPageProducer
     HTMLFile = 'templates\stk_onhanddate.html'
-    Left = 152
-    Top = 272
+    Left = 136
+    Top = 400
   end
   object stk_stockcard: TPageProducer
     HTMLFile = 'templates\stk_stockcard.html'
-    Left = 232
-    Top = 272
+    Left = 216
+    Top = 400
   end
   object rp_receiptdaily: TPageProducer
     HTMLFile = 'templates\rp_receiptdaily.html'
-    Left = 64
-    Top = 392
+    Left = 48
+    Top = 520
   end
   object login: TPageProducer
     HTMLFile = 'templates\login.html'
@@ -904,27 +1014,182 @@ object WebModule1: TWebModule1
   end
   object set_setmodel: TPageProducer
     HTMLFile = 'templates\set_setmodel.html'
-    Left = 152
+    Left = 144
     Top = 208
   end
   object set_setbaab: TPageProducer
     HTMLFile = 'templates\set_setbaab.html'
-    Left = 232
+    Left = 225
     Top = 208
   end
   object set_setgroup: TPageProducer
     HTMLFile = 'templates\set_setgroup.html'
-    Left = 368
+    Left = 386
     Top = 208
   end
   object set_setcolor: TPageProducer
     HTMLFile = 'templates\set_setcolor.html'
-    Left = 304
+    Left = 306
     Top = 208
   end
   object DataSource1: TDataSource
     DataSet = QPost
-    Left = 520
-    Top = 128
+    Left = 597
+    Top = 72
+  end
+  object set_regflag: TPageProducer
+    HTMLFile = 'templates\set_regflag.html'
+    Left = 467
+    Top = 208
+  end
+  object set_optmast: TPageProducer
+    HTMLFile = 'templates\set_optmast.html'
+    Left = 548
+    Top = 208
+  end
+  object set_optmastlocat: TPageProducer
+    HTMLFile = 'templates\set_optmastlocat.html'
+    Left = 629
+    Top = 208
+  end
+  object set_setmod: TPageProducer
+    HTMLFile = 'templates\set_setmod.html'
+    Left = 709
+    Top = 208
+  end
+  object set_modmast: TPageProducer
+    HTMLFile = 'templates\set_modmast.html'
+    Left = 790
+    Top = 208
+  end
+  object set_setfleet: TPageProducer
+    HTMLFile = 'templates\set_setfleet.html'
+    Left = 871
+    Top = 208
+  end
+  object set_bookingstatus: TPageProducer
+    HTMLFile = 'templates\set_bookingstatus.html'
+    Left = 952
+    Top = 208
+  end
+  object set_typcont: TPageProducer
+    HTMLFile = 'templates\set_typcont.html'
+    Left = 64
+    Top = 264
+  end
+  object set_typhold: TPageProducer
+    HTMLFile = 'templates\set_typhold.html'
+    Left = 144
+    Top = 264
+  end
+  object set_argroup: TPageProducer
+    HTMLFile = 'templates\set_argroup.html'
+    Left = 225
+    Top = 264
+  end
+  object set_setgrade: TPageProducer
+    HTMLFile = 'templates\set_setgrade.html'
+    Left = 386
+    Top = 264
+  end
+  object set_typlost: TPageProducer
+    HTMLFile = 'templates\set_typlost.html'
+    Left = 306
+    Top = 264
+  end
+  object set_setaump: TPageProducer
+    HTMLFile = 'templates\set_setaump.html'
+    Left = 467
+    Top = 264
+  end
+  object set_setprov: TPageProducer
+    HTMLFile = 'templates\set_setprov.html'
+    Left = 548
+    Top = 264
+  end
+  object set_paytyp: TPageProducer
+    HTMLFile = 'templates\set_paytyp.html'
+    Left = 629
+    Top = 264
+  end
+  object set_payfor: TPageProducer
+    HTMLFile = 'templates\set_payfor.html'
+    Left = 709
+    Top = 264
+  end
+  object set_setbank: TPageProducer
+    HTMLFile = 'templates\set_setbank.html'
+    Left = 790
+    Top = 264
+  end
+  object set_bankbook: TPageProducer
+    HTMLFile = 'templates\set_bankbook.html'
+    Left = 871
+    Top = 264
+  end
+  object set_rtchq: TPageProducer
+    HTMLFile = 'templates\set_rtchq.html'
+    Left = 952
+    Top = 264
+  end
+  object set_paydue: TPageProducer
+    HTMLFile = 'templates\set_paydue.html'
+    Left = 64
+    Top = 320
+  end
+  object set_setacti: TPageProducer
+    HTMLFile = 'templates\set_setacti.html'
+    Left = 144
+    Top = 320
+  end
+  object set_setreson: TPageProducer
+    HTMLFile = 'templates\set_setreson.html'
+    Left = 225
+    Top = 320
+  end
+  object PageProducer4: TPageProducer
+    HTMLFile = 'templates\set_setgrade.html'
+    Left = 386
+    Top = 320
+  end
+  object PageProducer5: TPageProducer
+    HTMLFile = 'templates\set_typlost.html'
+    Left = 306
+    Top = 320
+  end
+  object PageProducer6: TPageProducer
+    HTMLFile = 'templates\set_setaump.html'
+    Left = 467
+    Top = 320
+  end
+  object PageProducer7: TPageProducer
+    HTMLFile = 'templates\set_setprov.html'
+    Left = 548
+    Top = 320
+  end
+  object PageProducer8: TPageProducer
+    HTMLFile = 'templates\set_paytyp.html'
+    Left = 629
+    Top = 320
+  end
+  object PageProducer9: TPageProducer
+    HTMLFile = 'templates\set_payfor.html'
+    Left = 709
+    Top = 320
+  end
+  object PageProducer10: TPageProducer
+    HTMLFile = 'templates\set_setbank.html'
+    Left = 790
+    Top = 320
+  end
+  object PageProducer11: TPageProducer
+    HTMLFile = 'templates\set_bankbook.html'
+    Left = 871
+    Top = 320
+  end
+  object PageProducer12: TPageProducer
+    HTMLFile = 'templates\set_rtchq.html'
+    Left = 952
+    Top = 320
   end
 end

@@ -370,8 +370,8 @@ object WebModule1: TWebModule1
     EncryptedPassword = '8CFF91FFBFFFC6FFC6FF'
   end
   object DB2UniProvider1: TDB2UniProvider
-    Left = 424
-    Top = 72
+    Left = 520
+    Top = 16
   end
   object UniTransaction1: TUniTransaction
     DefaultConnection = UniConnection1
@@ -383,15 +383,15 @@ object WebModule1: TWebModule1
     Transaction = UniTransaction1
     SQL.Strings = (
       'select * from setgroup')
-    Left = 512
-    Top = 16
+    Left = 424
+    Top = 72
   end
   object QPost: TUniQuery
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
-    Left = 592
-    Top = 16
+    Left = 520
+    Top = 72
   end
   object frxReport1: TfrxReport
     Version = '5.4.6'
@@ -1039,8 +1039,8 @@ object WebModule1: TWebModule1
   end
   object DataSource1: TDataSource
     DataSet = QPost
-    Left = 701
-    Top = 128
+    Left = 597
+    Top = 72
   end
   object set_regflag: TPageProducer
     HTMLFile = 'templates\set_regflag.html'
@@ -1196,19 +1196,5 @@ object WebModule1: TWebModule1
     HTMLFile = 'templates\set_rtchq.html'
     Left = 952
     Top = 320
-  end
-  object QPost1: TUniQuery
-    Connection = UniConnection1
-    Transaction = UniTransaction1
-    CachedUpdates = True
-    Left = 592
-    Top = 72
-  end
-  object QPost2: TUniQuery
-    Connection = UniConnection1
-    Transaction = UniTransaction1
-    CachedUpdates = True
-    Left = 592
-    Top = 128
   end
 end

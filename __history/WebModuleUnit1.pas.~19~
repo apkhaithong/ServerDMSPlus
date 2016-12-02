@@ -725,10 +725,10 @@ begin
       end
       else
       begin
+        RqObjectTran := ja.Items[J] as TJSONObject;
         for J := 0 to ja.Count-1 do
         begin
-          RqObjectTran := ja.Items[J] as TJSONObject;
-          //Form1.Memo1.Lines.Add('value : '+ja.Items[J].ToJSON);
+          Form1.Memo1.Lines.Add('value : '+ja.Items[J].ToJSON);
           Form1.Memo1.Lines.Add('IDNO : '+RqObjectTran.GetValue('IDNO').Value);
           Form1.Memo1.Lines.Add('MODELCOD : '+RqObjectTran.GetValue('MODELCOD').Value);
           Form1.Memo1.Lines.Add('BAABCOD : '+RqObjectTran.GetValue('BAABCOD').Value);
