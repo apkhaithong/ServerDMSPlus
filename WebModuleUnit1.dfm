@@ -358,6 +358,7 @@ object WebModule1: TWebModule1
     Top = 75
   end
   object UniConnection1: TUniConnection
+    AutoCommit = False
     ProviderName = 'DB2'
     Port = 50000
     Database = 'TCHUMP'

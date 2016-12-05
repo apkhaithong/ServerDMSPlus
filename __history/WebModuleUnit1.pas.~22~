@@ -83,6 +83,8 @@ type
     PageProducer10: TPageProducer;
     PageProducer11: TPageProducer;
     PageProducer12: TPageProducer;
+    QPost1: TUniQuery;
+    QPost2: TUniQuery;
     procedure DSServerClass1GetClass(DSServerClass: TDSServerClass;
       var PersistentClass: TPersistentClass);
     procedure ServerFunctionInvokerHTMLTag(Sender: TObject; Tag: TTag;
@@ -660,7 +662,7 @@ end;
 procedure TWebModule1.WebModule1saveAllAction(Sender: TObject;
   Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
 var ja, LJsonArr : TJSONArray;
-    jo, RequestObject : TJSONObject;
+    jo, RqObjectMaster, RqObjectTran : TJSONObject;
     status, table, field, key, value, Return :string;
     I, J : integer;
 begin
@@ -672,15 +674,15 @@ begin
     Form1.Memo1.Lines.Clear;
     for I := 0 to LJsonArr.Count-1 do
     begin
-      RequestObject := LJsonArr.Items[I] as TJSONObject;
-      table  := RequestObject.GetValue('table').Value;
-      value  := RequestObject.GetValue('value').ToJSON;
+      RqObjectMaster := LJsonArr.Items[I] as TJSONObject;
+      table  := RqObjectMaster.GetValue('table').Value;
+      value  := RqObjectMaster.GetValue('value').ToJSON;
       ja     := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
       if (I = 0) then
       begin
-        status := RequestObject.GetValue('status').Value;
-        field  := RequestObject.GetValue('field').Value;
-        key    := RequestObject.GetValue('key').Value;
+        status := RqObjectMaster.GetValue('status').Value;
+        field  := RqObjectMaster.GetValue('field').Value;
+        key    := RqObjectMaster.GetValue('key').Value;
         if (status = 'insert') then
         begin
           with QGet do
@@ -723,9 +725,21 @@ begin
       end
       else
       begin
+        with QGet do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM '+table+' WHERE '+field+' =:V1 ');
+          Params.ParamValues['V1'] := key;
+          Open;
+        end;
         for J := 0 to ja.Count-1 do
         begin
-          Form1.Memo1.Lines.Add('value : '+ja.Items[J].ToJSON);
+          RqObjectTran := ja.Items[J] as TJSONObject;
+          //Form1.Memo1.Lines.Add('value : '+ja.Items[J].ToJSON);
+          Form1.Memo1.Lines.Add('IDNO : '+RqObjectTran.GetValue('IDNO').Value);
+          Form1.Memo1.Lines.Add('MODELCOD : '+RqObjectTran.GetValue('MODELCOD').Value);
+          Form1.Memo1.Lines.Add('BAABCOD : '+RqObjectTran.GetValue('BAABCOD').Value);
         end;
       end;
     end;

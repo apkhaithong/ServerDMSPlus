@@ -83,6 +83,8 @@ type
     PageProducer10: TPageProducer;
     PageProducer11: TPageProducer;
     PageProducer12: TPageProducer;
+    QPost1: TUniQuery;
+    QPost2: TUniQuery;
     procedure DSServerClass1GetClass(DSServerClass: TDSServerClass;
       var PersistentClass: TPersistentClass);
     procedure ServerFunctionInvokerHTMLTag(Sender: TObject; Tag: TTag;
@@ -547,7 +549,11 @@ begin
         SQL.Add('SELECT * FROM '+table+' WHERE '+field+' =:V1 ');
         Params.ParamByName('V1').AsString := key;
         Open;
-        Delete;
+      end;
+      QPost.First;
+      while not QPost.Eof do
+      begin
+        QPost.Delete;
       end;
       //StartTransaction
       QPost.Transaction.StartTransaction;
@@ -660,9 +666,9 @@ end;
 procedure TWebModule1.WebModule1saveAllAction(Sender: TObject;
   Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
 var ja, LJsonArr : TJSONArray;
-    jo, RequestObject : TJSONObject;
+    jo, RqObjectMaster, RqObjectTran : TJSONObject;
     status, table, field, key, value, Return :string;
-    I : integer;
+    I, J, K : integer;
 begin
   Handled := True;
   if Request.MethodType = mtPost then
@@ -672,12 +678,15 @@ begin
     Form1.Memo1.Lines.Clear;
     for I := 0 to LJsonArr.Count-1 do
     begin
-      RequestObject := LJsonArr.Items[I] as TJSONObject;
+      RqObjectMaster := LJsonArr.Items[I] as TJSONObject;
+      table  := RqObjectMaster.GetValue('table').Value;
+      value  := RqObjectMaster.GetValue('value').ToJSON;
+      ja     := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
       if (I = 0) then
       begin
-        status := RequestObject.GetValue('status').Value;
-        field  := RequestObject.GetValue('field').Value;
-        key    := RequestObject.GetValue('key').Value;
+        status := RqObjectMaster.GetValue('status').Value;
+        field  := RqObjectMaster.GetValue('field').Value;
+        key    := RqObjectMaster.GetValue('key').Value;
         if (status = 'insert') then
         begin
           with QGet do
@@ -717,37 +726,57 @@ begin
           //Convert data to record
           TConverter.New.JSON.Source(ja).ToRecord(QPost);
         end;
+      end
+      else
+      begin
+        with QPost2 do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM '+table+' WHERE '+field+' =:V1 ');
+          Params.ParamValues['V1'] := key;
+          Open;
+        end;
+        for J := 0 to ja.Count-1 do
+        begin
+          RqObjectTran := ja.Items[J] as TJSONObject;
+          if QPost2.Locate('IDNO',RqObjectTran.GetValue('IDNO').Value,[loPartialKey]) then
+          begin
+            QPost2.Edit;
+          end
+          else
+          begin
+            QPost2.Append;
+          end;
+          for K := 0 to QPost2.FieldCount-1 do
+          begin
+            if QPost2.Fields[K].FieldName <> 'IDNO' then
+            begin
+              QPost2.Fields[K].Value := RqObjectTran.GetValue(QPost2.Fields[K].FieldName).Value;
+            end;
+          end;
+        end;
       end;
-      table  := RequestObject.GetValue('table').Value;
-      value  := RequestObject.GetValue('value').ToJSON;
-      ja     := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
-
-      Form1.Memo1.Lines.Add('table : '+table);
-      Form1.Memo1.Lines.Add('value : '+value);
     end;
 
-
-
-//
-//    //StartTransaction
-//    QPost.Edit;
-//    QPost.Transaction.StartTransaction;
-//    try
-//      QPost.Post;
-//      QPost.ApplyUpdates();
-//      QPost.Transaction.Commit;
-//    finally
-//      if QPost.Transaction.Active then
-//      begin
-//        Return := 'false';
-//        QPost.Transaction.Rollback;
-//      end
-//      else
-//      begin
-//        Return := 'true';
-//      end;
-//    end;
-
+    //StartTransaction
+    UniConnection1.StartTransaction;
+    try
+      if QPost.Active then
+        QPost.ApplyUpdates;
+      if QPost2.Active then
+        QPost2.ApplyUpdates;
+      UniConnection1.Commit;
+    except
+      UniConnection1.Rollback;
+      Return := 'false';
+      raise;
+    end;
+    if QPost.Active then
+      QPost.CommitUpdates;
+    if QPost2.Active then
+      QPost2.CommitUpdates;
+    Return := 'true';
     //Response Data
     Response.ContentType := 'application/json;charset=UTF-8';
     Response.Content := Return;

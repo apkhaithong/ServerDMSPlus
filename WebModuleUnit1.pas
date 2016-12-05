@@ -549,7 +549,11 @@ begin
         SQL.Add('SELECT * FROM '+table+' WHERE '+field+' =:V1 ');
         Params.ParamByName('V1').AsString := key;
         Open;
-        Delete;
+      end;
+      QPost.First;
+      while not QPost.Eof do
+      begin
+        QPost.Delete;
       end;
       //StartTransaction
       QPost.Transaction.StartTransaction;
@@ -664,7 +668,7 @@ procedure TWebModule1.WebModule1saveAllAction(Sender: TObject;
 var ja, LJsonArr : TJSONArray;
     jo, RqObjectMaster, RqObjectTran : TJSONObject;
     status, table, field, key, value, Return :string;
-    I, J : integer;
+    I, J, K : integer;
 begin
   Handled := True;
   if Request.MethodType = mtPost then
@@ -725,39 +729,74 @@ begin
       end
       else
       begin
+        with QPost2 do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM '+table+' WHERE '+field+' =:V1 ');
+          Params.ParamValues['V1'] := key;
+          Open;
+        end;
+        //Delete record in old data
+        QPost2.First;
+        while not QPost2.Eof do
+        begin
+          K := 0;
+          for J := 0 to ja.Count-1 do
+          begin
+            RqObjectTran := ja.Items[J] as TJSONObject;
+            if StrToInt(RqObjectTran.GetValue('IDNO').Value) = QPost2.FieldByName('IDNO').AsInteger then
+            begin
+              K := K+1;
+              break;
+            end;
+          end;
+          if K = 0 then
+            QPost2.Delete
+          else
+            QPost2.Next;
+        end;
+        //Edit old data and Insert new data
         for J := 0 to ja.Count-1 do
         begin
           RqObjectTran := ja.Items[J] as TJSONObject;
-          //Form1.Memo1.Lines.Add('value : '+ja.Items[J].ToJSON);
-          Form1.Memo1.Lines.Add('IDNO : '+RqObjectTran.GetValue('IDNO').Value);
-          Form1.Memo1.Lines.Add('MODELCOD : '+RqObjectTran.GetValue('MODELCOD').Value);
-          Form1.Memo1.Lines.Add('BAABCOD : '+RqObjectTran.GetValue('BAABCOD').Value);
+          if QPost2.Locate('IDNO',RqObjectTran.GetValue('IDNO').Value,[loPartialKey]) then
+          begin
+            QPost2.Edit;
+          end
+          else
+          begin
+            QPost2.Append;
+          end;
+          for K := 0 to QPost2.FieldCount-1 do
+          begin
+            if QPost2.Fields[K].FieldName <> 'IDNO' then
+            begin
+              QPost2.Fields[K].Value := RqObjectTran.GetValue(QPost2.Fields[K].FieldName).Value;
+            end;
+          end;
         end;
       end;
     end;
 
-
-
-//
-//    //StartTransaction
-//    QPost.Edit;
-//    QPost.Transaction.StartTransaction;
-//    try
-//      QPost.Post;
-//      QPost.ApplyUpdates();
-//      QPost.Transaction.Commit;
-//    finally
-//      if QPost.Transaction.Active then
-//      begin
-//        Return := 'false';
-//        QPost.Transaction.Rollback;
-//      end
-//      else
-//      begin
-//        Return := 'true';
-//      end;
-//    end;
-
+    //StartTransaction
+    UniConnection1.StartTransaction;
+    try
+      if QPost.Active then
+        QPost.ApplyUpdates;
+      if QPost2.Active then
+        QPost2.ApplyUpdates;
+      UniConnection1.Commit;
+    except
+      UniConnection1.Rollback;
+      Return := 'false';
+      raise;
+    end;
+    if QPost.Active then
+      QPost.CommitUpdates;
+    if QPost2.Active then
+      QPost2.CommitUpdates;
+    Return := 'true';
     //Response Data
     Response.ContentType := 'application/json;charset=UTF-8';
     Response.Content := Return;
