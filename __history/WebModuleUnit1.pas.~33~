@@ -1,4 +1,4 @@
-unit WebModuleUnit1;
+﻿unit WebModuleUnit1;
 
 interface
 
@@ -13,7 +13,7 @@ uses
   frxDACComponents, frxUniDACComponents, Data.DB, MemDS, DBAccess, Uni,
   UniProvider, ODBCUniProvider, DB2UniProvider, DataSetConverter4D.Helper,
   DataSetConverter4D.Impl, DataSetConverter4D, DataSetConverter4D.Util, Inifiles,
-  Datasnap.DBClient;
+  Datasnap.DBClient, System.DateUtils;
 
 type
   TWebModule1 = class(TWebModule)
@@ -85,6 +85,10 @@ type
     PageProducer12: TPageProducer;
     QPost1: TUniQuery;
     QPost2: TUniQuery;
+    QLastno: TUniQuery;
+    Query1: TUniQuery;
+    QCondPay: TUniQuery;
+    QDBConfig: TUniQuery;
     procedure DSServerClass1GetClass(DSServerClass: TDSServerClass;
       var PersistentClass: TPersistentClass);
     procedure ServerFunctionInvokerHTMLTag(Sender: TObject; Tag: TTag;
@@ -121,6 +125,10 @@ type
       Response: TWebResponse; var Handled: Boolean);
     procedure WebModule1saveAllAction(Sender: TObject; Request: TWebRequest;
       Response: TWebResponse; var Handled: Boolean);
+    function ZeroLead(St:String;len:integer):String;
+    function RunNo(HField,LField,Lvalue:String;Dvalue:TdateTime):String;
+    procedure WebModule1saveModmastAction(Sender: TObject; Request: TWebRequest;
+      Response: TWebResponse; var Handled: Boolean);
   private
     { Private declarations }
     XSchema : string;
@@ -148,6 +156,78 @@ implementation
 {$R *.dfm}
 
 uses ServerMethodsUnit1, Web.WebReq, FormUnit1;
+
+function TWebModule1.ZeroLead(St:String;len:integer):String;
+var Zero,Chr1 : string;
+    j,ll : integer;
+begin
+    Chr1  := Trim(St);
+    Zero := '';
+    ll   := length(Chr1);
+    if len<ll Then len:=ll;
+
+    for j:=1 to len-ll do
+        Zero := Zero+'0';
+    Result := Zero+Chr1;
+end;
+
+function TWebModule1.RunNo(HField,LField,Lvalue:String;Dvalue:TdateTime):String;
+Var PF,HH,Lc,YY,Mm,S2,S3,Y1:String;
+    LN,V1: Double;
+begin
+  if not QCondPay.Active then
+    QCondPay.Open;
+  HH := QCondPay.Fieldbyname(HField).Asstring;
+  Lc := LValue;
+  YY := Copy(DateTostr(DValue), 7, 4);
+  Y1 := Copy(YY, 3, 2);
+  MM := Copy(DateTostr(DValue), 4, 2);
+  //Docno สาขา
+  with Query1 do
+  begin
+    Close;
+    SQL.Clear;
+    SQL.ADD('SELECT SHORTL FROM INVLOCAT WHERE LOCATCD=:LOCAT_A');
+    Params[0].Asstring := LC;
+    Open;
+    if (Query1.Eof) and (Query1.Bof) then
+      raise Exception.Create('äÁè¾ºÃËÑÊÊÒ¢Ò ' + LC + ' µÃÇ¨ÊÍº ÃËÑÊ¼èÒ¹ ªèÍ§»ÃÐ¨ÓÊÒ¢Ò ')
+    else
+      PF := COPY(Query1.FieldByname('SHORTL').Asstring, 1, 1);
+  end;
+  //Query Lastno Table
+  with QLastno do
+  begin
+    Close;
+    SQL.Clear;
+    SQL.ADD('SELECT LOCAT,CR_YEAR,CR_MONTH,' + LField + ' FROM LASTNO ' +
+            'WHERE LOCAT  = :LOCAT_A ' + ' AND CR_YEAR = :CRY ' + ' AND CR_MONTH= :CRM ');
+    Params[0].Asstring := LC;
+    Params[1].Asstring := YY;
+    Params[2].Asstring := MM;
+    Open;
+    if (QLastno.Eof) and (QLastno.Bof) then
+    begin
+      QLastno.Insert;
+      QLastno.Fieldbyname('Locat').Asstring := LC;
+      QLastno.Fieldbyname('Cr_year').Asstring := YY;
+      QLastno.Fieldbyname('Cr_Month').Asstring := MM;
+      QLastno.Post;
+    end;
+    LN := QLastNo.FieldByname(LField).AsFloat;
+    V1 := LN + 1;
+    S2 := FloatTostr(V1);
+    S3 := ZeroLead(S2, 4);
+    Result := PF + HH + '-' + Y1 + MM + S3;
+    //Update Lastno
+    if V1 > QLastNo.Fieldbyname(LField).AsFloat then
+    begin
+      QLastNo.Edit;
+      QLastNo.Fieldbyname(LField).AsFloat := V1;
+      QLastNo.Post;
+    end;
+  end;
+end;
 
 procedure TWebModule1.DSServerClass1GetClass(
   DSServerClass: TDSServerClass; var PersistentClass: TPersistentClass);
@@ -549,7 +629,11 @@ begin
         SQL.Add('SELECT * FROM '+table+' WHERE '+field+' =:V1 ');
         Params.ParamByName('V1').AsString := key;
         Open;
-        Delete;
+      end;
+      QPost.First;
+      while not QPost.Eof do
+      begin
+        QPost.Delete;
       end;
       //StartTransaction
       QPost.Transaction.StartTransaction;
@@ -664,7 +748,7 @@ procedure TWebModule1.WebModule1saveAllAction(Sender: TObject;
 var ja, LJsonArr : TJSONArray;
     jo, RqObjectMaster, RqObjectTran : TJSONObject;
     status, table, field, key, value, Return :string;
-    I, J : integer;
+    I, J, K : integer;
 begin
   Handled := True;
   if Request.MethodType = mtPost then
@@ -725,39 +809,273 @@ begin
       end
       else
       begin
+        with QPost2 do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM '+table+' WHERE '+field+' =:V1 ');
+          Params.ParamValues['V1'] := key;
+          Open;
+        end;
+        //Delete record in old data
+        QPost2.First;
+        while not QPost2.Eof do
+        begin
+          K := 0;
+          for J := 0 to ja.Count-1 do
+          begin
+            RqObjectTran := ja.Items[J] as TJSONObject;
+            if StrToInt(RqObjectTran.GetValue('IDNO').Value) = QPost2.FieldByName('IDNO').AsInteger then
+            begin
+              K := K+1;
+              break;
+            end;
+          end;
+          if K = 0 then
+            QPost2.Delete
+          else
+            QPost2.Next;
+        end;
+        //Edit old data and Insert new data
         for J := 0 to ja.Count-1 do
         begin
           RqObjectTran := ja.Items[J] as TJSONObject;
-          //Form1.Memo1.Lines.Add('value : '+ja.Items[J].ToJSON);
-          Form1.Memo1.Lines.Add('IDNO : '+RqObjectTran.GetValue('IDNO').Value);
-          Form1.Memo1.Lines.Add('MODELCOD : '+RqObjectTran.GetValue('MODELCOD').Value);
-          Form1.Memo1.Lines.Add('BAABCOD : '+RqObjectTran.GetValue('BAABCOD').Value);
+          if QPost2.Locate('IDNO',RqObjectTran.GetValue('IDNO').Value,[loPartialKey]) then
+          begin
+            QPost2.Edit;
+          end
+          else
+          begin
+            QPost2.Append;
+          end;
+          for K := 0 to QPost2.FieldCount-1 do
+          begin
+            if QPost2.Fields[K].FieldName <> 'IDNO' then
+            begin
+              QPost2.Fields[K].Value := RqObjectTran.GetValue(QPost2.Fields[K].FieldName).Value;
+            end;
+          end;
+        end;
+      end;
+    end;
+
+    //StartTransaction
+    UniConnection1.StartTransaction;
+    try
+      if QPost.Active then
+        QPost.ApplyUpdates;
+      if QPost2.Active then
+        QPost2.ApplyUpdates;
+      UniConnection1.Commit;
+    except
+      UniConnection1.Rollback;
+      Return := 'false';
+      raise;
+    end;
+    if QPost.Active then
+      QPost.CommitUpdates;
+    if QPost2.Active then
+      QPost2.CommitUpdates;
+    Return := 'true';
+    //Response Data
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := Return;
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
+procedure TWebModule1.WebModule1saveModmastAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var ja, LJsonArr : TJSONArray;
+    jo, RqObjectMaster, RqObjectTran : TJSONObject;
+    status, table, field, key, value, Return, locat, HF,LF,LV,S :string;
+    I : integer;
+    DV :TdateTime;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Get Data MODMAST
+    RqObjectMaster := LJsonArr.Items[0] as TJSONObject;
+    table  := RqObjectMaster.GetValue('table').Value;
+    if table = 'MODMAST' then
+    begin
+      locat  := RqObjectMaster.GetValue('locat').Value;
+      value  := RqObjectMaster.GetValue('value').ToJSON;
+      status := RqObjectMaster.GetValue('status').Value;
+      field  := RqObjectMaster.GetValue('field').Value;
+      key    := RqObjectMaster.GetValue('key').Value;
+      ja     := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+
+      if (status = 'insert') then
+      begin
+        with QPost do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM '+table+' WHERE '+field+' IS NULL ');
+          Open;
+          Insert;
+        end;
+        HF := 'H_MODMAST';
+        LF := 'L_MODMAST';
+        If Not QDBConfig.Active Then
+        begin
+          QDBConfig.ParamByName('LOCAT').AsString := locat;
+          QDbconfig.Open;
+        end;
+        //Convert data to record
+        TConverter.New.JSON.Source(ja).ToDataSet(QPost);
+        If QDBConfig.Fieldbyname('R_MODMAST').asstring = 'Y' Then
+        begin
+          LV := locat;
+          DV := QPost.FieldByName('MODDT').AsDateTime;
+          QPost.Edit;
+          QPost.FieldByName('MODNO').AsString := RunNo(HF,LF,LV,DV);
+        end;
+        QPost.Edit;
+        QPost.FieldByName('MODDT').AsDateTime := Now;
+      end
+      else
+      begin
+        with QPost do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM '+table+' WHERE '+field+' =:V1 ');
+          Params.ParamByName('V1').AsString := key;
+          Open;
+          Edit;
         end;
       end;
     end;
 
 
+    for I := 0 to LJsonArr.Count-1 do
+    begin
+      RqObjectMaster := LJsonArr.Items[I] as TJSONObject;
+      table  := RqObjectMaster.GetValue('table').Value;
+      value  := RqObjectMaster.GetValue('value').ToJSON;
+      ja     := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+      if (I = 0) then
+      begin
+        status := RqObjectMaster.GetValue('status').Value;
+        field  := RqObjectMaster.GetValue('field').Value;
+        key    := RqObjectMaster.GetValue('key').Value;
+        if (status = 'insert') then
+        begin
+          with QGet do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('SELECT NAME FROM SYSIBM.SYSCOLUMNS WHERE TBNAME =:V1 AND TBCREATOR =:V2 AND KEYSEQ = ''1'' ');
+            ParamByName('V1').AsString := table;
+            ParamByName('V2').AsString := UpperCase(XSchema);
+            Open;
+          end;
 
-//
-//    //StartTransaction
-//    QPost.Edit;
-//    QPost.Transaction.StartTransaction;
-//    try
-//      QPost.Post;
-//      QPost.ApplyUpdates();
-//      QPost.Transaction.Commit;
-//    finally
-//      if QPost.Transaction.Active then
-//      begin
-//        Return := 'false';
-//        QPost.Transaction.Rollback;
-//      end
-//      else
-//      begin
-//        Return := 'true';
-//      end;
-//    end;
+          with QPost do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('SELECT * FROM '+table+' WHERE '+QGet.FieldByName('NAME').AsString+' IS NULL ');
+            Open;
+            Insert;
+          end;
 
+          //Convert data to record
+          TConverter.New.JSON.Source(ja).ToDataSet(QPost);
+        end
+        else
+        begin
+          with QPost do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('SELECT * FROM '+table+' WHERE '+field+' =:V1 ');
+            Params.ParamByName('V1').AsString := key;
+            Open;
+            Edit;
+          end;
+
+          //Convert data to record
+          TConverter.New.JSON.Source(ja).ToRecord(QPost);
+        end;
+      end
+      else
+      begin
+        with QPost2 do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM '+table+' WHERE '+field+' =:V1 ');
+          Params.ParamValues['V1'] := key;
+          Open;
+        end;
+        //Delete record in old data
+        QPost2.First;
+        while not QPost2.Eof do
+        begin
+          K := 0;
+          for J := 0 to ja.Count-1 do
+          begin
+            RqObjectTran := ja.Items[J] as TJSONObject;
+            if StrToInt(RqObjectTran.GetValue('IDNO').Value) = QPost2.FieldByName('IDNO').AsInteger then
+            begin
+              K := K+1;
+              break;
+            end;
+          end;
+          if K = 0 then
+            QPost2.Delete
+          else
+            QPost2.Next;
+        end;
+        //Edit old data and Insert new data
+        for J := 0 to ja.Count-1 do
+        begin
+          RqObjectTran := ja.Items[J] as TJSONObject;
+          if QPost2.Locate('IDNO',RqObjectTran.GetValue('IDNO').Value,[loPartialKey]) then
+          begin
+            QPost2.Edit;
+          end
+          else
+          begin
+            QPost2.Append;
+          end;
+          for K := 0 to QPost2.FieldCount-1 do
+          begin
+            if QPost2.Fields[K].FieldName <> 'IDNO' then
+            begin
+              QPost2.Fields[K].Value := RqObjectTran.GetValue(QPost2.Fields[K].FieldName).Value;
+            end;
+          end;
+        end;
+      end;
+    end;
+
+    //StartTransaction
+    UniConnection1.StartTransaction;
+    try
+      if QPost.Active then
+        QPost.ApplyUpdates;
+      if QPost2.Active then
+        QPost2.ApplyUpdates;
+      UniConnection1.Commit;
+    except
+      UniConnection1.Rollback;
+      Return := 'false';
+      raise;
+    end;
+    if QPost.Active then
+      QPost.CommitUpdates;
+    if QPost2.Active then
+      QPost2.CommitUpdates;
+    Return := 'true';
     //Response Data
     Response.ContentType := 'application/json;charset=UTF-8';
     Response.Content := Return;

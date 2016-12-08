@@ -68,6 +68,11 @@ object WebModule1: TWebModule1
       OnAction = WebModule1saveAllAction
     end
     item
+      Name = 'saveModmast'
+      PathInfo = '/saveModmast'
+      OnAction = WebModule1saveModmastAction
+    end
+    item
       Name = 'delete'
       PathInfo = '/delete'
       OnAction = WebModule1deleteAction
@@ -1211,5 +1216,40 @@ object WebModule1: TWebModule1
     CachedUpdates = True
     Left = 592
     Top = 128
+  end
+  object QLastno: TUniQuery
+    Connection = UniConnection1
+    Transaction = UniTransaction1
+    CachedUpdates = True
+    Left = 512
+    Top = 72
+  end
+  object Query1: TUniQuery
+    Connection = UniConnection1
+    Transaction = UniTransaction1
+    Left = 512
+    Top = 128
+  end
+  object QCondPay: TUniQuery
+    Connection = UniConnection1
+    Transaction = UniTransaction1
+    SQL.Strings = (
+      'SELECT * FROM CONDPAY')
+    Left = 440
+    Top = 128
+  end
+  object QDBConfig: TUniQuery
+    Connection = UniConnection1
+    Transaction = UniTransaction1
+    SQL.Strings = (
+      'SELECT * FROM DBCONFIG WHERE LOCATCD =:LOCAT')
+    Left = 776
+    Top = 128
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'LOCAT'
+        Value = nil
+      end>
   end
 end

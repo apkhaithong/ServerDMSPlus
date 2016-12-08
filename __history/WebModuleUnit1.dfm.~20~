@@ -63,6 +63,16 @@ object WebModule1: TWebModule1
       OnAction = WebModule1saveOneAction
     end
     item
+      Name = 'saveAll'
+      PathInfo = '/saveAll'
+      OnAction = WebModule1saveAllAction
+    end
+    item
+      Name = 'saveModmast'
+      PathInfo = '/saveModmast'
+      OnAction = WebModule1saveModmastAction
+    end
+    item
       Name = 'delete'
       PathInfo = '/delete'
       OnAction = WebModule1deleteAction
@@ -227,6 +237,21 @@ object WebModule1: TWebModule1
       Name = 'set_rtchq'
       PathInfo = '/set_rtchq'
       Producer = set_rtchq
+    end
+    item
+      Name = 'set_paydue'
+      PathInfo = '/set_paydue'
+      Producer = set_paydue
+    end
+    item
+      Name = 'set_setacti'
+      PathInfo = '/set_setacti'
+      Producer = set_setacti
+    end
+    item
+      Name = 'set_setreson'
+      PathInfo = '/set_setreson'
+      Producer = set_setreson
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 589
@@ -338,6 +363,7 @@ object WebModule1: TWebModule1
     Top = 75
   end
   object UniConnection1: TUniConnection
+    AutoCommit = False
     ProviderName = 'DB2'
     Port = 50000
     Database = 'TCHUMP'
@@ -350,8 +376,8 @@ object WebModule1: TWebModule1
     EncryptedPassword = '8CFF91FFBFFFC6FFC6FF'
   end
   object DB2UniProvider1: TDB2UniProvider
-    Left = 520
-    Top = 16
+    Left = 424
+    Top = 72
   end
   object UniTransaction1: TUniTransaction
     DefaultConnection = UniConnection1
@@ -363,15 +389,15 @@ object WebModule1: TWebModule1
     Transaction = UniTransaction1
     SQL.Strings = (
       'select * from setgroup')
-    Left = 424
-    Top = 72
+    Left = 512
+    Top = 16
   end
   object QPost: TUniQuery
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
-    Left = 520
-    Top = 72
+    Left = 592
+    Top = 16
   end
   object frxReport1: TfrxReport
     Version = '5.4.6'
@@ -1019,8 +1045,8 @@ object WebModule1: TWebModule1
   end
   object DataSource1: TDataSource
     DataSet = QPost
-    Left = 597
-    Top = 72
+    Left = 701
+    Top = 128
   end
   object set_regflag: TPageProducer
     HTMLFile = 'templates\set_regflag.html'
@@ -1117,18 +1143,18 @@ object WebModule1: TWebModule1
     Left = 952
     Top = 264
   end
-  object PageProducer1: TPageProducer
-    HTMLFile = 'templates\set_typcont.html'
+  object set_paydue: TPageProducer
+    HTMLFile = 'templates\set_paydue.html'
     Left = 64
     Top = 320
   end
-  object PageProducer2: TPageProducer
-    HTMLFile = 'templates\set_typhold.html'
+  object set_setacti: TPageProducer
+    HTMLFile = 'templates\set_setacti.html'
     Left = 144
     Top = 320
   end
-  object PageProducer3: TPageProducer
-    HTMLFile = 'templates\set_argroup.html'
+  object set_setreson: TPageProducer
+    HTMLFile = 'templates\set_setreson.html'
     Left = 225
     Top = 320
   end
@@ -1176,5 +1202,54 @@ object WebModule1: TWebModule1
     HTMLFile = 'templates\set_rtchq.html'
     Left = 952
     Top = 320
+  end
+  object QPost1: TUniQuery
+    Connection = UniConnection1
+    Transaction = UniTransaction1
+    CachedUpdates = True
+    Left = 592
+    Top = 72
+  end
+  object QPost2: TUniQuery
+    Connection = UniConnection1
+    Transaction = UniTransaction1
+    CachedUpdates = True
+    Left = 592
+    Top = 128
+  end
+  object QLastno: TUniQuery
+    Connection = UniConnection1
+    Transaction = UniTransaction1
+    CachedUpdates = True
+    Left = 512
+    Top = 72
+  end
+  object Query1: TUniQuery
+    Connection = UniConnection1
+    Transaction = UniTransaction1
+    Left = 512
+    Top = 128
+  end
+  object QCondPay: TUniQuery
+    Connection = UniConnection1
+    Transaction = UniTransaction1
+    SQL.Strings = (
+      'select * from setgroup')
+    Left = 440
+    Top = 128
+  end
+  object QDBConfig: TUniQuery
+    Connection = UniConnection1
+    Transaction = UniTransaction1
+    SQL.Strings = (
+      'SELECT * FROM DBCONFIG WHERE LOCATCD =:LOCAT')
+    Left = 776
+    Top = 128
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'LOCAT'
+        Value = nil
+      end>
   end
 end

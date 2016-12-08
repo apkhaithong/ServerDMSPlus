@@ -63,6 +63,11 @@ object WebModule1: TWebModule1
       OnAction = WebModule1saveOneAction
     end
     item
+      Name = 'saveAll'
+      PathInfo = '/saveAll'
+      OnAction = WebModule1saveAllAction
+    end
+    item
       Name = 'delete'
       PathInfo = '/delete'
       OnAction = WebModule1deleteAction
@@ -202,6 +207,46 @@ object WebModule1: TWebModule1
       Name = 'set_setprov'
       PathInfo = '/set_setprov'
       Producer = set_setprov
+    end
+    item
+      Name = 'set_paytyp'
+      PathInfo = '/set_paytyp'
+      Producer = set_paytyp
+    end
+    item
+      Name = 'set_payfor'
+      PathInfo = '/set_payfor'
+      Producer = set_payfor
+    end
+    item
+      Name = 'set_setbank'
+      PathInfo = '/set_setbank'
+      Producer = set_setbank
+    end
+    item
+      Name = 'set_bankbook'
+      PathInfo = '/set_bankbook'
+      Producer = set_bankbook
+    end
+    item
+      Name = 'set_rtchq'
+      PathInfo = '/set_rtchq'
+      Producer = set_rtchq
+    end
+    item
+      Name = 'set_paydue'
+      PathInfo = '/set_paydue'
+      Producer = set_paydue
+    end
+    item
+      Name = 'set_setacti'
+      PathInfo = '/set_setacti'
+      Producer = set_setacti
+    end
+    item
+      Name = 'set_setreson'
+      PathInfo = '/set_setreson'
+      Producer = set_setreson
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 589
@@ -313,6 +358,7 @@ object WebModule1: TWebModule1
     Top = 75
   end
   object UniConnection1: TUniConnection
+    AutoCommit = False
     ProviderName = 'DB2'
     Port = 50000
     Database = 'TCHUMP'
@@ -325,8 +371,8 @@ object WebModule1: TWebModule1
     EncryptedPassword = '8CFF91FFBFFFC6FFC6FF'
   end
   object DB2UniProvider1: TDB2UniProvider
-    Left = 520
-    Top = 16
+    Left = 424
+    Top = 72
   end
   object UniTransaction1: TUniTransaction
     DefaultConnection = UniConnection1
@@ -338,15 +384,15 @@ object WebModule1: TWebModule1
     Transaction = UniTransaction1
     SQL.Strings = (
       'select * from setgroup')
-    Left = 424
-    Top = 72
+    Left = 512
+    Top = 16
   end
   object QPost: TUniQuery
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
-    Left = 520
-    Top = 72
+    Left = 592
+    Top = 16
   end
   object frxReport1: TfrxReport
     Version = '5.4.6'
@@ -994,8 +1040,8 @@ object WebModule1: TWebModule1
   end
   object DataSource1: TDataSource
     DataSet = QPost
-    Left = 597
-    Top = 72
+    Left = 701
+    Top = 128
   end
   object set_regflag: TPageProducer
     HTMLFile = 'templates\set_regflag.html'
@@ -1067,29 +1113,103 @@ object WebModule1: TWebModule1
     Left = 548
     Top = 264
   end
-  object PageProducer8: TPageProducer
-    HTMLFile = 'templates\set_optmastlocat.html'
+  object set_paytyp: TPageProducer
+    HTMLFile = 'templates\set_paytyp.html'
     Left = 629
     Top = 264
   end
-  object PageProducer9: TPageProducer
-    HTMLFile = 'templates\set_setmod.html'
+  object set_payfor: TPageProducer
+    HTMLFile = 'templates\set_payfor.html'
     Left = 709
     Top = 264
   end
-  object PageProducer10: TPageProducer
-    HTMLFile = 'templates\set_modmast.html'
+  object set_setbank: TPageProducer
+    HTMLFile = 'templates\set_setbank.html'
     Left = 790
     Top = 264
   end
-  object PageProducer11: TPageProducer
-    HTMLFile = 'templates\set_setfleet.html'
+  object set_bankbook: TPageProducer
+    HTMLFile = 'templates\set_bankbook.html'
     Left = 871
     Top = 264
   end
-  object PageProducer12: TPageProducer
-    HTMLFile = 'templates\set_bookingstatus.html'
+  object set_rtchq: TPageProducer
+    HTMLFile = 'templates\set_rtchq.html'
     Left = 952
     Top = 264
+  end
+  object set_paydue: TPageProducer
+    HTMLFile = 'templates\set_paydue.html'
+    Left = 64
+    Top = 320
+  end
+  object set_setacti: TPageProducer
+    HTMLFile = 'templates\set_setacti.html'
+    Left = 144
+    Top = 320
+  end
+  object set_setreson: TPageProducer
+    HTMLFile = 'templates\set_setreson.html'
+    Left = 225
+    Top = 320
+  end
+  object PageProducer4: TPageProducer
+    HTMLFile = 'templates\set_setgrade.html'
+    Left = 386
+    Top = 320
+  end
+  object PageProducer5: TPageProducer
+    HTMLFile = 'templates\set_typlost.html'
+    Left = 306
+    Top = 320
+  end
+  object PageProducer6: TPageProducer
+    HTMLFile = 'templates\set_setaump.html'
+    Left = 467
+    Top = 320
+  end
+  object PageProducer7: TPageProducer
+    HTMLFile = 'templates\set_setprov.html'
+    Left = 548
+    Top = 320
+  end
+  object PageProducer8: TPageProducer
+    HTMLFile = 'templates\set_paytyp.html'
+    Left = 629
+    Top = 320
+  end
+  object PageProducer9: TPageProducer
+    HTMLFile = 'templates\set_payfor.html'
+    Left = 709
+    Top = 320
+  end
+  object PageProducer10: TPageProducer
+    HTMLFile = 'templates\set_setbank.html'
+    Left = 790
+    Top = 320
+  end
+  object PageProducer11: TPageProducer
+    HTMLFile = 'templates\set_bankbook.html'
+    Left = 871
+    Top = 320
+  end
+  object PageProducer12: TPageProducer
+    HTMLFile = 'templates\set_rtchq.html'
+    Left = 952
+    Top = 320
+  end
+  object QPost1: TUniQuery
+    Connection = UniConnection1
+    Transaction = UniTransaction1
+    CachedUpdates = True
+    Left = 592
+    Top = 72
+  end
+  object QPost2: TUniQuery
+    Connection = UniConnection1
+    Transaction = UniTransaction1
+    CachedUpdates = True
+    Left = 592
+    Top = 128
   end
 end
