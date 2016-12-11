@@ -74,21 +74,28 @@ type
     set_paydue: TPageProducer;
     set_setacti: TPageProducer;
     set_setreson: TPageProducer;
-    PageProducer4: TPageProducer;
-    PageProducer5: TPageProducer;
-    PageProducer6: TPageProducer;
-    PageProducer7: TPageProducer;
-    PageProducer8: TPageProducer;
-    PageProducer9: TPageProducer;
-    PageProducer10: TPageProducer;
-    PageProducer11: TPageProducer;
-    PageProducer12: TPageProducer;
+    set_garmast: TPageProducer;
+    set_finmast: TPageProducer;
+    set_apmast: TPageProducer;
+    set_company: TPageProducer;
+    set_invlocat: TPageProducer;
+    set_invparking: TPageProducer;
+    set_docconfig: TPageProducer;
+    set_officer: TPageProducer;
+    set_division: TPageProducer;
     QPost1: TUniQuery;
     QPost2: TUniQuery;
     QLastno: TUniQuery;
     Query1: TUniQuery;
     QCondPay: TUniQuery;
     QDBConfig: TUniQuery;
+    set_vatmast: TPageProducer;
+    set_table1: TPageProducer;
+    set_intrmast: TPageProducer;
+    set_dbconfig: TPageProducer;
+    set_channelsend: TPageProducer;
+    set_setfollowupcall: TPageProducer;
+    set_setcompaint: TPageProducer;
     procedure DSServerClass1GetClass(DSServerClass: TDSServerClass;
       var PersistentClass: TPersistentClass);
     procedure ServerFunctionInvokerHTMLTag(Sender: TObject; Tag: TTag;
@@ -128,6 +135,10 @@ type
     function ZeroLead(St:String;len:integer):String;
     function RunNo(HField,LField,Lvalue:String;Dvalue:TdateTime):String;
     procedure WebModule1saveModmastAction(Sender: TObject; Request: TWebRequest;
+      Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1checkrightAction(Sender: TObject; Request: TWebRequest;
+      Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1checkRundocAction(Sender: TObject; Request: TWebRequest;
       Response: TWebResponse; var Handled: Boolean);
   private
     { Private declarations }
@@ -601,6 +612,100 @@ begin
   end;
 end;
 
+procedure TWebModule1.WebModule1checkrightAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var ja, LJsonArr : TJSONArray;
+    jo, RequestObject : TJSONObject;
+    userid, menucode :string;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    //Convert Content to JSON Array
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    RequestObject := LJsonArr.Items[0] as TJSONObject;
+    userid   := RequestObject.GetValue('userid').Value;
+    menucode := RequestObject.GetValue('menucode').Value;
+    with QGet do
+    begin
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT M_ACCESS, M_EDIT, M_INSERT, M_DELETE '+
+              'FROM USERMENU WHERE USERID =:V1 AND MENUCODE =:V2 ');
+      ParamByName('V1').AsString := userid;
+      ParamByName('V2').AsString := menucode;
+      Open;
+    end;
+    //Response Data
+    try
+      if QGet.IsEmpty then
+      begin
+        ja := TJSONArray.Create;
+        jo := TJSONObject.Create;
+      end
+      else
+      begin
+        ja := TConverter.New.DataSet(QGet).AsJSONArray;
+        jo := TConverter.New.DataSet.Source(QGet).AsJSONObject;
+      end;
+    finally
+      Response.ContentType := 'application/json;charset=UTF-8';
+      Response.Content := ja.ToString;
+      ja.DisposeOf;
+    end;
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
+procedure TWebModule1.WebModule1checkRundocAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var ja, LJsonArr : TJSONArray;
+    jo, RequestObject : TJSONObject;
+    document, locat :string;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    //Convert Content to JSON Array
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    RequestObject := LJsonArr.Items[0] as TJSONObject;
+    document := RequestObject.GetValue('doc').Value;
+    locat := RequestObject.GetValue('locat').Value;
+    with QGet do
+    begin
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT '+document+' AS RUNNING FROM DBCONFIG WHERE LOCATCD =:V1 ');
+      ParamByName('V1').AsString := locat;
+      Open;
+    end;
+    //Response Data
+    try
+      if QGet.IsEmpty then
+      begin
+        ja := TJSONArray.Create;
+        jo := TJSONObject.Create;
+      end
+      else
+      begin
+        ja := TConverter.New.DataSet(QGet).AsJSONArray;
+        jo := TConverter.New.DataSet.Source(QGet).AsJSONObject;
+      end;
+    finally
+      Response.ContentType := 'application/json;charset=UTF-8';
+      Response.Content := ja.ToString;
+      ja.DisposeOf;
+    end;
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
 procedure TWebModule1.WebModule1deleteAction(Sender: TObject;
   Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
 var ja, LJsonArr : TJSONArray;
@@ -969,6 +1074,7 @@ begin
         QPost.FieldByName('INPUTDT').AsDateTime := Now;
         QPost.FieldByName('MOMO1').AsString     := RqObjectTran.GetValue('MOMO1').Value;
         QPost.FieldByName('SUMOPTPRC').AsFloat  := StrToFloat(RqObjectTran.GetValue('SUMOPTPRC').Value);
+        modno := QPost.FieldByName('MODNO').AsString;
       end;
     end;
     //Get Data MODTRAN
@@ -1029,7 +1135,6 @@ begin
     end;
 
     //StartTransaction
-    Return := modno;
     UniConnection1.StartTransaction;
     try
       if QPost.Active then
@@ -1041,11 +1146,11 @@ begin
       UniConnection1.Commit;
     except
       UniConnection1.Rollback;
-      Return := 'NotSave';
+      Return := 'false';
       //Response Data
       Response.ContentType := 'application/json;charset=UTF-8';
       Response.Content := Return;
-      Abort;
+      raise;
     end;
     if QPost.Active then
       QPost.CommitUpdates;
@@ -1053,9 +1158,11 @@ begin
       QPost2.CommitUpdates;
     if QLastno.Active then
       QLastno.CommitUpdates;
+    Return := 'true';
       //Response Data
-      Response.ContentType := 'application/json;charset=UTF-8';
-      Response.Content := Return;
+
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := '[{ "save": '+Return+', "modno": "'+modno+'" }]';
   end
   else
   begin

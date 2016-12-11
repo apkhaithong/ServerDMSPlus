@@ -1,9 +1,17 @@
 [Stats]
-EditorSecs=14407
-DesignerSecs=236
-InspectorSecs=1392
-CompileSecs=1502740
-OtherSecs=3563
+<<<<<<< HEAD
+EditorSecs=14936
+DesignerSecs=299
+InspectorSecs=1452
+CompileSecs=1601481
+OtherSecs=3896
+=======
+EditorSecs=9607
+DesignerSecs=229
+InspectorSecs=1339
+CompileSecs=1441078
+OtherSecs=3442
+>>>>>>> origin/master
 StartTime=22/10/2016 22:29:38
 RealKeys=0
 EffectiveKeys=0

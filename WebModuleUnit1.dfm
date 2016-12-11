@@ -53,6 +53,16 @@ object WebModule1: TWebModule1
       OnAction = WebModule1checkloginAction
     end
     item
+      Name = 'checkright'
+      PathInfo = '/checkright'
+      OnAction = WebModule1checkrightAction
+    end
+    item
+      Name = 'checkRundoc'
+      PathInfo = '/checkRundoc'
+      OnAction = WebModule1checkRundocAction
+    end
+    item
       Name = 'duplicateCheck'
       PathInfo = '/duplicateCheck'
       OnAction = WebModule1duplicateCheckAction
@@ -252,54 +262,129 @@ object WebModule1: TWebModule1
       Name = 'set_setreson'
       PathInfo = '/set_setreson'
       Producer = set_setreson
+    end
+    item
+      Name = 'set_finmast'
+      PathInfo = '/set_finmast'
+      Producer = set_finmast
+    end
+    item
+      Name = 'set_garmast'
+      PathInfo = '/set_garmast'
+      Producer = set_garmast
+    end
+    item
+      Name = 'set_apmast'
+      PathInfo = '/set_apmast'
+      Producer = set_apmast
+    end
+    item
+      Name = 'set_company'
+      PathInfo = '/set_company'
+      Producer = set_company
+    end
+    item
+      Name = 'set_invlocat'
+      PathInfo = '/set_invlocat'
+      Producer = set_invlocat
+    end
+    item
+      Name = 'set_invparking'
+      PathInfo = '/set_invparking'
+      Producer = set_invparking
+    end
+    item
+      Name = 'set_officer'
+      PathInfo = '/set_officer'
+      Producer = set_officer
+    end
+    item
+      Name = 'set_division'
+      PathInfo = '/set_division'
+      Producer = set_division
+    end
+    item
+      Name = 'set_vatmast'
+      PathInfo = '/set_vatmast'
+      Producer = set_vatmast
+    end
+    item
+      Name = 'set_table1'
+      PathInfo = '/set_table1'
+      Producer = set_table1
+    end
+    item
+      Name = 'set_intrmast'
+      PathInfo = '/set_intrmast'
+      Producer = set_intrmast
+    end
+    item
+      Name = 'set_dbconfig'
+      PathInfo = '/set_dbconfig'
+      Producer = set_dbconfig
+    end
+    item
+      Name = 'set_channelsend'
+      PathInfo = '/set_channelsend'
+      Producer = set_channelsend
+    end
+    item
+      Name = 'set_setfollowupcall'
+      PathInfo = '/set_setfollowupcall'
+      Producer = set_setfollowupcall
+    end
+    item
+      Name = 'set_setcompaint'
+      PathInfo = '/set_setcompaint'
+      Producer = set_setcompaint
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 589
-  Width = 1052
+  Width = 1028
   object DSServer1: TDSServer
-    Left = 64
+    Left = 49
     Top = 11
   end
   object DSHTTPWebDispatcher1: TDSHTTPWebDispatcher
     Server = DSServer1
     Filters = <>
     WebDispatch.PathInfo = 'datasnap*'
-    Left = 64
+    Left = 49
     Top = 75
   end
   object DSServerClass1: TDSServerClass
     OnGetClass = DSServerClass1GetClass
     Server = DSServer1
-    Left = 184
+    Left = 169
     Top = 11
   end
   object ServerFunctionInvoker: TPageProducer
     HTMLFile = 'Templates\ServerFunctionInvoker.html'
     OnHTMLTag = ServerFunctionInvokerHTMLTag
-    Left = 64
+    Left = 49
     Top = 144
   end
   object ReverseString: TPageProducer
     HTMLFile = 'templates\ReverseString.html'
     OnHTMLTag = ServerFunctionInvokerHTMLTag
-    Left = 152
+    Left = 137
     Top = 144
   end
   object DSProxyGenerator1: TDSProxyGenerator
     ExcludeClasses = 'DSMetadata'
     MetaDataProvider = DSServerMetaDataProvider1
     Writer = 'Java Script REST'
-    Left = 312
+    Left = 297
     Top = 16
   end
   object DSServerMetaDataProvider1: TDSServerMetaDataProvider
     Server = DSServer1
-    Left = 312
+    Left = 297
     Top = 75
   end
   object Index: TPageProducer
     HTMLFile = 'templates\index.html'
-    Left = 232
+    Left = 217
     Top = 144
   end
   object WebFileDispatcher1: TWebFileDispatcher
@@ -359,7 +444,7 @@ object WebModule1: TWebModule1
         DirectoryMask = '\templates\*'
       end>
     RootDirectory = '.'
-    Left = 184
+    Left = 169
     Top = 75
   end
   object UniConnection1: TUniConnection
@@ -371,17 +456,17 @@ object WebModule1: TWebModule1
     Server = 'localhost'
     LoginPrompt = False
     BeforeConnect = UniConnection1BeforeConnect
-    Left = 424
+    Left = 409
     Top = 16
     EncryptedPassword = '8CFF91FFBFFFC6FFC6FF'
   end
   object DB2UniProvider1: TDB2UniProvider
-    Left = 424
+    Left = 409
     Top = 72
   end
   object UniTransaction1: TUniTransaction
     DefaultConnection = UniConnection1
-    Left = 701
+    Left = 686
     Top = 16
   end
   object QGet: TUniQuery
@@ -389,14 +474,14 @@ object WebModule1: TWebModule1
     Transaction = UniTransaction1
     SQL.Strings = (
       'select * from setgroup')
-    Left = 512
+    Left = 497
     Top = 16
   end
   object QPost: TUniQuery
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
-    Left = 592
+    Left = 577
     Top = 16
   end
   object frxReport1: TfrxReport
@@ -418,7 +503,7 @@ object WebModule1: TWebModule1
       'end.')
     ShowProgress = False
     OnGetValue = frxReport1GetValue
-    Left = 877
+    Left = 862
     Top = 16
     Datasets = <
       item
@@ -902,12 +987,12 @@ object WebModule1: TWebModule1
   end
   object frxUniDACComponents1: TfrxUniDACComponents
     DefaultDatabase = UniConnection1
-    Left = 701
+    Left = 686
     Top = 72
   end
   object frxUserDataSet1: TfrxUserDataSet
     UserName = 'frxUserDataSet1'
-    Left = 877
+    Left = 862
     Top = 72
   end
   object frxXLSXExport1: TfrxXLSXExport
@@ -919,7 +1004,7 @@ object WebModule1: TWebModule1
     ChunkSize = 0
     PictureType = gpPNG
     Wysiwyg = False
-    Left = 981
+    Left = 966
     Top = 72
   end
   object frxDBDataset1: TfrxDBDataset
@@ -927,7 +1012,7 @@ object WebModule1: TWebModule1
     CloseDataSource = False
     DataSet = QGet
     BCDToCurrency = False
-    Left = 805
+    Left = 790
     Top = 72
   end
   object frxPDFExport1: TfrxPDFExport
@@ -953,7 +1038,7 @@ object WebModule1: TWebModule1
     CenterWindow = False
     PrintScaling = False
     PdfA = False
-    Left = 981
+    Left = 966
     Top = 16
   end
   object frxDesigner1: TfrxDesigner
@@ -975,259 +1060,259 @@ object WebModule1: TWebModule1
     Restrictions = []
     RTLLanguage = False
     MemoParentFont = False
-    Left = 805
+    Left = 790
     Top = 16
   end
   object Page404: TPageProducer
     HTMLFile = 'templates\pages.404.html'
-    Left = 304
+    Left = 289
     Top = 144
   end
   object stk_onhand: TPageProducer
     HTMLFile = 'templates\stk_onhand.html'
-    Left = 48
-    Top = 400
+    Left = 33
+    Top = 416
   end
   object sale_customer: TPageProducer
     HTMLFile = 'templates\sale_customer.html'
-    Left = 48
+    Left = 33
     Top = 464
   end
   object sale_prospect: TPageProducer
     HTMLFile = 'templates\sale_prospect.html'
-    Left = 136
+    Left = 121
     Top = 464
   end
   object stk_onhanddate: TPageProducer
     HTMLFile = 'templates\stk_onhanddate.html'
-    Left = 136
-    Top = 400
+    Left = 121
+    Top = 416
   end
   object stk_stockcard: TPageProducer
     HTMLFile = 'templates\stk_stockcard.html'
-    Left = 216
-    Top = 400
+    Left = 201
+    Top = 416
   end
   object rp_receiptdaily: TPageProducer
     HTMLFile = 'templates\rp_receiptdaily.html'
-    Left = 48
+    Left = 33
     Top = 520
   end
   object login: TPageProducer
     HTMLFile = 'templates\login.html'
-    Left = 368
+    Left = 353
     Top = 144
   end
   object set_settype: TPageProducer
     HTMLFile = 'templates\set_settype.html'
-    Left = 64
-    Top = 208
+    Left = 49
+    Top = 192
   end
   object set_setmodel: TPageProducer
     HTMLFile = 'templates\set_setmodel.html'
-    Left = 144
-    Top = 208
+    Left = 129
+    Top = 192
   end
   object set_setbaab: TPageProducer
     HTMLFile = 'templates\set_setbaab.html'
-    Left = 225
-    Top = 208
+    Left = 210
+    Top = 192
   end
   object set_setgroup: TPageProducer
     HTMLFile = 'templates\set_setgroup.html'
-    Left = 386
-    Top = 208
+    Left = 371
+    Top = 192
   end
   object set_setcolor: TPageProducer
     HTMLFile = 'templates\set_setcolor.html'
-    Left = 306
-    Top = 208
+    Left = 291
+    Top = 192
   end
   object DataSource1: TDataSource
     DataSet = QPost
-    Left = 701
+    Left = 686
     Top = 128
   end
   object set_regflag: TPageProducer
     HTMLFile = 'templates\set_regflag.html'
-    Left = 467
-    Top = 208
+    Left = 452
+    Top = 192
   end
   object set_optmast: TPageProducer
     HTMLFile = 'templates\set_optmast.html'
-    Left = 548
-    Top = 208
+    Left = 533
+    Top = 192
   end
   object set_optmastlocat: TPageProducer
     HTMLFile = 'templates\set_optmastlocat.html'
-    Left = 629
-    Top = 208
+    Left = 614
+    Top = 192
   end
   object set_setmod: TPageProducer
     HTMLFile = 'templates\set_setmod.html'
-    Left = 709
-    Top = 208
+    Left = 694
+    Top = 192
   end
   object set_modmast: TPageProducer
     HTMLFile = 'templates\set_modmast.html'
-    Left = 790
-    Top = 208
+    Left = 775
+    Top = 192
   end
   object set_setfleet: TPageProducer
     HTMLFile = 'templates\set_setfleet.html'
-    Left = 871
-    Top = 208
+    Left = 856
+    Top = 192
   end
   object set_bookingstatus: TPageProducer
     HTMLFile = 'templates\set_bookingstatus.html'
-    Left = 952
-    Top = 208
+    Left = 937
+    Top = 192
   end
   object set_typcont: TPageProducer
     HTMLFile = 'templates\set_typcont.html'
-    Left = 64
-    Top = 264
+    Left = 49
+    Top = 240
   end
   object set_typhold: TPageProducer
     HTMLFile = 'templates\set_typhold.html'
-    Left = 144
-    Top = 264
+    Left = 129
+    Top = 240
   end
   object set_argroup: TPageProducer
     HTMLFile = 'templates\set_argroup.html'
-    Left = 225
-    Top = 264
+    Left = 210
+    Top = 240
   end
   object set_setgrade: TPageProducer
     HTMLFile = 'templates\set_setgrade.html'
-    Left = 386
-    Top = 264
+    Left = 371
+    Top = 240
   end
   object set_typlost: TPageProducer
     HTMLFile = 'templates\set_typlost.html'
-    Left = 306
-    Top = 264
+    Left = 291
+    Top = 240
   end
   object set_setaump: TPageProducer
     HTMLFile = 'templates\set_setaump.html'
-    Left = 467
-    Top = 264
+    Left = 452
+    Top = 240
   end
   object set_setprov: TPageProducer
     HTMLFile = 'templates\set_setprov.html'
-    Left = 548
-    Top = 264
+    Left = 533
+    Top = 240
   end
   object set_paytyp: TPageProducer
     HTMLFile = 'templates\set_paytyp.html'
-    Left = 629
-    Top = 264
+    Left = 614
+    Top = 240
   end
   object set_payfor: TPageProducer
     HTMLFile = 'templates\set_payfor.html'
-    Left = 709
-    Top = 264
+    Left = 694
+    Top = 240
   end
   object set_setbank: TPageProducer
     HTMLFile = 'templates\set_setbank.html'
-    Left = 790
-    Top = 264
+    Left = 775
+    Top = 240
   end
   object set_bankbook: TPageProducer
     HTMLFile = 'templates\set_bankbook.html'
-    Left = 871
-    Top = 264
+    Left = 856
+    Top = 240
   end
   object set_rtchq: TPageProducer
     HTMLFile = 'templates\set_rtchq.html'
-    Left = 952
-    Top = 264
+    Left = 937
+    Top = 240
   end
   object set_paydue: TPageProducer
     HTMLFile = 'templates\set_paydue.html'
-    Left = 64
-    Top = 320
+    Left = 49
+    Top = 288
   end
   object set_setacti: TPageProducer
     HTMLFile = 'templates\set_setacti.html'
-    Left = 144
-    Top = 320
+    Left = 129
+    Top = 288
   end
   object set_setreson: TPageProducer
     HTMLFile = 'templates\set_setreson.html'
-    Left = 225
-    Top = 320
+    Left = 210
+    Top = 288
   end
-  object PageProducer4: TPageProducer
-    HTMLFile = 'templates\set_setgrade.html'
-    Left = 386
-    Top = 320
+  object set_garmast: TPageProducer
+    HTMLFile = 'templates\set_garmast.html'
+    Left = 371
+    Top = 288
   end
-  object PageProducer5: TPageProducer
-    HTMLFile = 'templates\set_typlost.html'
-    Left = 306
-    Top = 320
+  object set_finmast: TPageProducer
+    HTMLFile = 'templates\set_finmast.html'
+    Left = 291
+    Top = 288
   end
-  object PageProducer6: TPageProducer
-    HTMLFile = 'templates\set_setaump.html'
-    Left = 467
-    Top = 320
+  object set_apmast: TPageProducer
+    HTMLFile = 'templates\set_apmast.html'
+    Left = 452
+    Top = 288
   end
-  object PageProducer7: TPageProducer
-    HTMLFile = 'templates\set_setprov.html'
-    Left = 548
-    Top = 320
+  object set_company: TPageProducer
+    HTMLFile = 'templates\set_company.html'
+    Left = 533
+    Top = 288
   end
-  object PageProducer8: TPageProducer
-    HTMLFile = 'templates\set_paytyp.html'
-    Left = 629
-    Top = 320
+  object set_invlocat: TPageProducer
+    HTMLFile = 'templates\sset_invlocat.html'
+    Left = 614
+    Top = 288
   end
-  object PageProducer9: TPageProducer
-    HTMLFile = 'templates\set_payfor.html'
-    Left = 709
-    Top = 320
+  object set_invparking: TPageProducer
+    HTMLFile = 'templates\set_invparking.html'
+    Left = 694
+    Top = 288
   end
-  object PageProducer10: TPageProducer
-    HTMLFile = 'templates\set_setbank.html'
-    Left = 790
-    Top = 320
+  object set_docconfig: TPageProducer
+    HTMLFile = 'templates\set_docconfig.html'
+    Left = 775
+    Top = 288
   end
-  object PageProducer11: TPageProducer
-    HTMLFile = 'templates\set_bankbook.html'
-    Left = 871
-    Top = 320
+  object set_officer: TPageProducer
+    HTMLFile = 'templates\set_officer.html'
+    Left = 856
+    Top = 288
   end
-  object PageProducer12: TPageProducer
-    HTMLFile = 'templates\set_rtchq.html'
-    Left = 952
-    Top = 320
+  object set_division: TPageProducer
+    HTMLFile = 'templates\set_division.html'
+    Left = 937
+    Top = 288
   end
   object QPost1: TUniQuery
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
-    Left = 592
+    Left = 577
     Top = 72
   end
   object QPost2: TUniQuery
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
-    Left = 592
+    Left = 577
     Top = 128
   end
   object QLastno: TUniQuery
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
-    Left = 512
+    Left = 497
     Top = 72
   end
   object Query1: TUniQuery
     Connection = UniConnection1
     Transaction = UniTransaction1
-    Left = 512
+    Left = 497
     Top = 128
   end
   object QCondPay: TUniQuery
@@ -1235,7 +1320,7 @@ object WebModule1: TWebModule1
     Transaction = UniTransaction1
     SQL.Strings = (
       'SELECT * FROM CONDPAY')
-    Left = 440
+    Left = 425
     Top = 128
   end
   object QDBConfig: TUniQuery
@@ -1243,7 +1328,7 @@ object WebModule1: TWebModule1
     Transaction = UniTransaction1
     SQL.Strings = (
       'SELECT * FROM DBCONFIG WHERE LOCATCD =:LOCAT')
-    Left = 776
+    Left = 761
     Top = 128
     ParamData = <
       item
@@ -1251,5 +1336,40 @@ object WebModule1: TWebModule1
         Name = 'LOCAT'
         Value = nil
       end>
+  end
+  object set_vatmast: TPageProducer
+    HTMLFile = 'templates\set_vatmast.html'
+    Left = 49
+    Top = 336
+  end
+  object set_table1: TPageProducer
+    HTMLFile = 'templates\set_table1.html'
+    Left = 129
+    Top = 336
+  end
+  object set_intrmast: TPageProducer
+    HTMLFile = 'templates\set_intrmast.html'
+    Left = 210
+    Top = 336
+  end
+  object set_dbconfig: TPageProducer
+    HTMLFile = 'templates\set_dbconfig.html'
+    Left = 291
+    Top = 336
+  end
+  object set_channelsend: TPageProducer
+    HTMLFile = 'templates\set_channelsend.html'
+    Left = 371
+    Top = 336
+  end
+  object set_setfollowupcall: TPageProducer
+    HTMLFile = 'templates\set_setfollowupcall.html'
+    Left = 452
+    Top = 336
+  end
+  object set_setcompaint: TPageProducer
+    HTMLFile = 'templates\set_setcompaint.html'
+    Left = 533
+    Top = 336
   end
 end
