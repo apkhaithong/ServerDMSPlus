@@ -1264,7 +1264,7 @@ object WebModule1: TWebModule1
     Top = 288
   end
   object set_invlocat: TPageProducer
-    HTMLFile = 'templates\sset_invlocat.html'
+    HTMLFile = 'templates\set_invlocat.html'
     Left = 614
     Top = 288
   end
