@@ -337,10 +337,105 @@ object WebModule1: TWebModule1
       Name = 'set_setcompaint'
       PathInfo = '/set_setcompaint'
       Producer = set_setcompaint
+    end
+    item
+      Name = 'stk_receiveddms'
+      PathInfo = '/stk_receiveddms'
+      Producer = stk_receiveddms
+    end
+    item
+      Name = 'stk_receivestk'
+      PathInfo = '/stk_receivestk'
+      Producer = stk_receivestk
+    end
+    item
+      Name = 'stk_receiveopt'
+      PathInfo = '/stk_receiveopt'
+      Producer = stk_receiveopt
+    end
+    item
+      Name = 'stk_receivemod'
+      PathInfo = '/stk_receivemod'
+      Producer = stk_receivemod
+    end
+    item
+      Name = 'stk_adjuststk'
+      PathInfo = '/stk_adjuststk'
+      Producer = stk_adjuststk
+    end
+    item
+      Name = 'stk_movestk'
+      PathInfo = '/stk_movestk'
+      Producer = stk_movestk
+    end
+    item
+      Name = 'stk_movetoasset'
+      PathInfo = '/stk_movetoasset'
+      Producer = stk_movetoasset
+    end
+    item
+      Name = 'stk_parkingstk'
+      PathInfo = '/stk_parkingstk'
+      Producer = stk_parkingstk
+    end
+    item
+      Name = 'stk_onhandopt'
+      PathInfo = '/stk_onhandopt'
+      Producer = stk_onhandopt
+    end
+    item
+      Name = 'sale_acard'
+      PathInfo = '/sale_acard'
+      Producer = sale_acard
+    end
+    item
+      Name = 'sale_arresv'
+      PathInfo = '/sale_arresv'
+      Producer = sale_arresv
+    end
+    item
+      Name = 'sale_matchstrno'
+      PathInfo = '/sale_matchstrno'
+      Producer = sale_matchstrno
+    end
+    item
+      Name = 'sale_arcred'
+      PathInfo = '/sale_arcred'
+      Producer = sale_arcred
+    end
+    item
+      Name = 'sale_armast'
+      PathInfo = '/sale_armast'
+      Producer = sale_armast
+    end
+    item
+      Name = 'sale_arfinc'
+      PathInfo = '/sale_arfinc'
+      Producer = sale_arfinc
+    end
+    item
+      Name = 'sale_smcostfin'
+      PathInfo = '/sale_smcostfin'
+      Producer = sale_smcostfin
+    end
+    item
+      Name = 'sale_arcostsale'
+      PathInfo = '/sale_arcostsale'
+      Producer = sale_arcostsale
+    end
+    item
+      Name = 'sale_saleordercust'
+      PathInfo = '/sale_saleordercust'
+      Producer = sale_saleordercust
+    end
+    item
+      Name = 'sale_saleorder'
+      PathInfo = '/sale_saleorder'
+      Producer = sale_saleorder
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 589
-  Width = 1028
+  Width = 1142
   object DSServer1: TDSServer
     Left = 49
     Top = 11
@@ -1070,28 +1165,28 @@ object WebModule1: TWebModule1
   end
   object stk_onhand: TPageProducer
     HTMLFile = 'templates\stk_onhand.html'
-    Left = 33
-    Top = 416
+    Left = 953
+    Top = 392
   end
   object sale_customer: TPageProducer
     HTMLFile = 'templates\sale_customer.html'
-    Left = 33
-    Top = 464
+    Left = 137
+    Top = 448
   end
   object sale_prospect: TPageProducer
     HTMLFile = 'templates\sale_prospect.html'
-    Left = 121
-    Top = 464
+    Left = 49
+    Top = 448
   end
   object stk_onhanddate: TPageProducer
     HTMLFile = 'templates\stk_onhanddate.html'
-    Left = 121
-    Top = 416
+    Left = 793
+    Top = 392
   end
   object stk_stockcard: TPageProducer
     HTMLFile = 'templates\stk_stockcard.html'
-    Left = 201
-    Top = 416
+    Left = 873
+    Top = 392
   end
   object rp_receiptdaily: TPageProducer
     HTMLFile = 'templates\rp_receiptdaily.html'
@@ -1371,5 +1466,105 @@ object WebModule1: TWebModule1
     HTMLFile = 'templates\set_setcompaint.html'
     Left = 533
     Top = 336
+  end
+  object stk_receiveddms: TPageProducer
+    HTMLFile = 'templates\stk_receiveddms.html'
+    Left = 49
+    Top = 392
+  end
+  object stk_receivestk: TPageProducer
+    HTMLFile = 'templates\stk_receivestk.html'
+    Left = 137
+    Top = 392
+  end
+  object stk_receiveopt: TPageProducer
+    HTMLFile = 'templates\stk_receiveopt.html'
+    Left = 217
+    Top = 392
+  end
+  object stk_receivemod: TPageProducer
+    HTMLFile = 'templates\stk_receivemod.html'
+    Left = 297
+    Top = 392
+  end
+  object stk_adjuststk: TPageProducer
+    HTMLFile = 'templates\stk_adjuststk.html'
+    Left = 377
+    Top = 392
+  end
+  object stk_movestk: TPageProducer
+    HTMLFile = 'templates\stk_movestk.html'
+    Left = 457
+    Top = 392
+  end
+  object stk_movetoasset: TPageProducer
+    HTMLFile = 'templates\stk_movetoasset.html'
+    Left = 537
+    Top = 392
+  end
+  object stk_parkingstk: TPageProducer
+    HTMLFile = 'templates\stk_parkingstk.html'
+    Left = 625
+    Top = 392
+  end
+  object stk_onhandopt: TPageProducer
+    HTMLFile = 'templates\stk_onhandopt.html'
+    Left = 705
+    Top = 392
+  end
+  object sale_acard: TPageProducer
+    HTMLFile = 'templates\sale_acard.html'
+    Left = 217
+    Top = 448
+  end
+  object sale_arresv: TPageProducer
+    HTMLFile = 'templates\sale_acard.html'
+    Left = 297
+    Top = 448
+  end
+  object sale_matchstrno: TPageProducer
+    HTMLFile = 'templates\sale_matchstrno.html'
+    Left = 377
+    Top = 448
+  end
+  object sale_arcred: TPageProducer
+    HTMLFile = 'templates\sale_arcred.html'
+    Left = 457
+    Top = 448
+  end
+  object sale_armast: TPageProducer
+    HTMLFile = 'templates\sale_armast.html'
+    Left = 537
+    Top = 448
+  end
+  object sale_arfinc: TPageProducer
+    HTMLFile = 'templates\sale_arfinc.html'
+    Left = 625
+    Top = 448
+  end
+  object sale_ar_invoi: TPageProducer
+    HTMLFile = 'templates\sale_ar_invoi.html'
+    Left = 705
+    Top = 448
+  end
+  object sale_smcostfin: TPageProducer
+    HTMLFile = 'templates\sale_smcostfin.html'
+    Left = 793
+    Top = 448
+  end
+  object sale_arcostsale: TPageProducer
+    HTMLFile = 'templates\sale_arcostsale.html'
+    Left = 873
+    Top = 448
+  end
+  object sale_saleordercust: TPageProducer
+    HTMLFile = 'templates\sale_saleordercust.html'
+    Left = 969
+    Top = 448
+  end
+  object sale_saleorder: TPageProducer
+    HTMLFile = 'templates\sale_saleorder.html'
+    Left = 1057
+    Top = 448
   end
 end
