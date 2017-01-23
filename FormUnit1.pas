@@ -7,7 +7,9 @@ uses
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.AppEvnts, Vcl.StdCtrls, IdHTTPWebBrokerBridge, Web.HTTPApp, frxCross,
   frxRich, frxOLE, frxBarcode, frxDesgn, frxClass, frxChart, frxDMPExport,
-  frxChBox, frxGradient, Data.DB, Vcl.Grids, Vcl.DBGrids;
+  frxChBox, frxGradient, Data.DB, Vcl.Grids, Vcl.DBGrids, Inifiles,
+  frxDACComponents, frxUniDACComponents, UniProvider, ODBCUniProvider,
+  DB2UniProvider, DBAccess, Uni;
 
 type
   TForm1 = class(TForm)
@@ -32,6 +34,9 @@ type
     frxRichObject1: TfrxRichObject;
     frxCrossObject1: TfrxCrossObject;
     Memo1: TMemo;
+    UniConnection1: TUniConnection;
+    DB2UniProvider1: TDB2UniProvider;
+    frxUniDACComponents1: TfrxUniDACComponents;
     procedure FormCreate(Sender: TObject);
     procedure ApplicationEvents1Idle(Sender: TObject; var Done: Boolean);
     procedure ButtonStartClick(Sender: TObject);
@@ -39,7 +44,9 @@ type
     procedure ButtonOpenBrowserClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure UniConnection1BeforeConnect(Sender: TObject);
   private
+    XSchema : string;
     FServer: TIdHTTPWebBrokerBridge;
     procedure StartServer;
     { Private declarations }
@@ -139,6 +146,17 @@ begin
     FServer.DefaultPort := StrToInt(EditPort.Text);
     FServer.Active := True;
   end;
+end;
+
+procedure TForm1.UniConnection1BeforeConnect(Sender: TObject);
+var DBconfig : Tinifile;
+begin
+  DBconfig := Tinifile.create(ExtractFilePath(paramstr(0))+'/config.ini');
+  UniConnection1.Server   := DBconfig.Readstring('DATABASE','SERVER','');
+  UniConnection1.Port     := StrToInt(DBconfig.Readstring('DATABASE','PORT',''));
+  UniConnection1.Database := DBconfig.Readstring('DATABASE','DBNAME','');
+  UniConnection1.Username := DBconfig.Readstring('DATABASE','SCHEMA','');
+  XSchema :=  DBconfig.Readstring('DATABASE','SCHEMA','');
 end;
 
 end.

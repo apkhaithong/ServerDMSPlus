@@ -11,6 +11,7 @@ object Form1: TForm1
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  Position = poDesktopCenter
   OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96
@@ -659,5 +660,27 @@ object Form1: TForm1
   object frxCrossObject1: TfrxCrossObject
     Left = 304
     Top = 240
+  end
+  object UniConnection1: TUniConnection
+    AutoCommit = False
+    ProviderName = 'DB2'
+    Port = 50000
+    Database = 'TCHUMP'
+    Username = 'sn'
+    Server = 'localhost'
+    LoginPrompt = False
+    BeforeConnect = UniConnection1BeforeConnect
+    Left = 332
+    Top = 56
+    EncryptedPassword = '8CFF91FFBFFFC6FFC6FF'
+  end
+  object DB2UniProvider1: TDB2UniProvider
+    Left = 332
+    Top = 112
+  end
+  object frxUniDACComponents1: TfrxUniDACComponents
+    DefaultDatabase = UniConnection1
+    Left = 220
+    Top = 16
   end
 end

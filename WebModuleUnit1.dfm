@@ -83,6 +83,11 @@ object WebModule1: TWebModule1
       OnAction = WebModule1saveModmastAction
     end
     item
+      Name = 'saveInvinvo'
+      PathInfo = '/saveInvinvo'
+      OnAction = WebModule1saveInvinvoAction
+    end
+    item
       Name = 'delete'
       PathInfo = '/delete'
       OnAction = WebModule1deleteAction
@@ -432,6 +437,11 @@ object WebModule1: TWebModule1
       Name = 'sale_saleorder'
       PathInfo = '/sale_saleorder'
       Producer = sale_saleorder
+    end
+    item
+      Name = 'duplicateStrno'
+      PathInfo = '/duplicateStrno'
+      OnAction = WebModule1duplicateStrnoAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 589
