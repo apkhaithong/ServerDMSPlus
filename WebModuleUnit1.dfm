@@ -442,6 +442,11 @@ object WebModule1: TWebModule1
       Name = 'duplicateStrno'
       PathInfo = '/duplicateStrno'
       OnAction = WebModule1duplicateStrnoAction
+    end
+    item
+      Name = 'saveArcred'
+      PathInfo = '/saveArcred'
+      OnAction = WebModule1saveArcredAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 589
