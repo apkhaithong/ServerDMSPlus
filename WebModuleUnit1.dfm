@@ -447,6 +447,16 @@ object WebModule1: TWebModule1
       Name = 'saveArcred'
       PathInfo = '/saveArcred'
       OnAction = WebModule1saveArcredAction
+    end
+    item
+      Name = 'cancelArcred'
+      PathInfo = '/cancelArcred'
+      OnAction = WebModule1cancelArcredAction
+    end
+    item
+      Name = 'saveCustmast'
+      PathInfo = '/saveCustmast'
+      OnAction = WebModule1saveCustmastAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 589
@@ -581,7 +591,6 @@ object WebModule1: TWebModule1
   end
   object QGet: TUniQuery
     Connection = UniConnection1
-    Transaction = UniTransaction1
     SQL.Strings = (
       'select * from setgroup')
     Left = 497
@@ -1414,14 +1423,12 @@ object WebModule1: TWebModule1
   end
   object QLastno: TUniQuery
     Connection = UniConnection1
-    Transaction = UniTransaction1
     CachedUpdates = True
     Left = 497
     Top = 72
   end
   object Query1: TUniQuery
     Connection = UniConnection1
-    Transaction = UniTransaction1
     Left = 497
     Top = 128
   end
@@ -1435,7 +1442,6 @@ object WebModule1: TWebModule1
   end
   object QDBConfig: TUniQuery
     Connection = UniConnection1
-    Transaction = UniTransaction1
     SQL.Strings = (
       'SELECT * FROM DBCONFIG WHERE LOCATCD =:LOCAT')
     Left = 761
@@ -1581,5 +1587,11 @@ object WebModule1: TWebModule1
     HTMLFile = 'templates\sale_saleorder.html'
     Left = 1057
     Top = 448
+  end
+  object QPost3: TUniQuery
+    Connection = UniConnection1
+    CachedUpdates = True
+    Left = 625
+    Top = 128
   end
 end
