@@ -457,9 +457,14 @@ object WebModule1: TWebModule1
       Name = 'saveCustmast'
       PathInfo = '/saveCustmast'
       OnAction = WebModule1saveCustmastAction
+    end
+    item
+      Name = 'fin_chqmas'
+      PathInfo = '/fin_chqmas'
+      Producer = fin_chqmas
     end>
   BeforeDispatch = WebModuleBeforeDispatch
-  Height = 589
+  Height = 733
   Width = 1142
   object DSServer1: TDSServer
     Left = 49
@@ -1215,7 +1220,7 @@ object WebModule1: TWebModule1
   object rp_receiptdaily: TPageProducer
     HTMLFile = 'templates\rp_receiptdaily.html'
     Left = 33
-    Top = 520
+    Top = 656
   end
   object login: TPageProducer
     HTMLFile = 'templates\login.html'
@@ -1593,5 +1598,10 @@ object WebModule1: TWebModule1
     CachedUpdates = True
     Left = 625
     Top = 128
+  end
+  object fin_chqmas: TPageProducer
+    HTMLFile = 'templates\fin_chqmas.html'
+    Left = 49
+    Top = 504
   end
 end

@@ -108,6 +108,7 @@ type
     sale_saleordercust: TPageProducer;
     sale_saleorder: TPageProducer;
     QPost3: TUniQuery;
+    fin_chqmas: TPageProducer;
     procedure DSServerClass1GetClass(DSServerClass: TDSServerClass; var PersistentClass: TPersistentClass);
     procedure ServerFunctionInvokerHTMLTag(Sender: TObject; Tag: TTag; const TagString: string; TagParams: TStrings; var ReplaceText: string);
     procedure WebModuleDefaultAction(Sender: TObject; Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
