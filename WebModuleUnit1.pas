@@ -109,6 +109,7 @@ type
     sale_saleorder: TPageProducer;
     QPost3: TUniQuery;
     fin_chqmas: TPageProducer;
+    QPost4: TUniQuery;
     procedure DSServerClass1GetClass(DSServerClass: TDSServerClass; var PersistentClass: TPersistentClass);
     procedure ServerFunctionInvokerHTMLTag(Sender: TObject; Tag: TTag; const TagString: string; TagParams: TStrings; var ReplaceText: string);
     procedure WebModuleDefaultAction(Sender: TObject; Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
@@ -138,6 +139,8 @@ type
     procedure WebModule1saveArcredAction(Sender: TObject; Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure WebModule1cancelArcredAction(Sender: TObject; Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure WebModule1saveCustmastAction(Sender: TObject; Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1saveChqmasAction(Sender: TObject; Request: TWebRequest;
+      Response: TWebResponse; var Handled: Boolean);
   private
     { Private declarations }
     XSchema: string;
@@ -167,7 +170,7 @@ implementation
 {$R *.dfm}
 
 uses
-  ServerMethodsUnit1, Web.WebReq, FormUnit1;
+  ServerMethodsUnit1, Web.WebReq, FormUnit1, Functn01;
 
 function TWebModule1.ZeroLead(St: string; len: integer): string;
 var
@@ -1339,6 +1342,445 @@ begin
 
     Response.ContentType := 'application/json;charset=UTF-8';
     Response.Content := '[{ "save": ' + Return + ', "contno": "' + docno + '" }]';
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
+procedure TWebModule1.WebModule1saveChqmasAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  ja, LJsonArr: TJSONArray;
+  jo, RqObjectMaster, RqObjectTran: TJSONObject;
+  status, table, key, value, Return, locat, docno, apcode, HF, LF, LV,
+  THF, TLF, Taxfl, Cuscode, Locatpay, Taxdesc : string;
+  I, J, K, Contid, Chqmasid: integer;
+  docdt, DV: TdateTime;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Get Data CHQMAS
+    RqObjectMaster := LJsonArr.Items[0] as TJSONObject;
+    table := RqObjectMaster.GetValue('table').Value;
+    locat := RqObjectMaster.GetValue('locat').Value;
+    value := RqObjectMaster.GetValue('value').ToJSON;
+    status := RqObjectMaster.GetValue('status').Value;
+    key := RqObjectMaster.GetValue('key').Value;
+    if table = 'CHQMAS' then
+    begin
+      ja := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+
+      with QPost do
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Add('SELECT * FROM CHQMAS WHERE IDNO IS NULL ');
+        Open;
+      end;
+      if not QDBConfig.Active then
+      begin
+        QDBConfig.ParamByName('LOCAT').AsString := locat;
+        QDbconfig.Open;
+      end;
+      RqObjectTran := ja.Items[0] as TJSONObject;
+      //TAXFL
+      with Query1 do
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Add('SELECT * FROM PAYFOR WHERE FORCODE =:0 ');
+        Params[0].AsString := RqObjectTran.GetValue('PAYFOR').Value;
+        Open;
+      end;
+      Taxfl   := Query1.FieldByName('TAXFL').AsString;
+      Taxdesc := Query1.FieldByName('FORDESC').AsString;
+      //CUSCOD and CONTID
+      if RqObjectTran.GetValue('TSALE').Value = 'T' then
+      begin
+        with Query1 do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT IDNO, CUSCOD FROM CUSTMAST WHERE CUSCOD =:0 ');
+          Params[0].AsString := RqObjectTran.GetValue('CONTNO').Value;
+          Open;
+        end;
+        Cuscode  := Query1.FieldByName('CUSCOD').AsString;
+        Contid   := Query1.FieldByName('IDNO').AsInteger;
+        Locatpay := locat;
+      end
+      else if (RqObjectTran.GetValue('TSALE').Value = 'X') then
+      begin
+        with Query1 do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT IDNO, CUSCOD, LOCAT FROM AROTHSALE WHERE ARCONT =:0 ');
+          Params[0].AsString := RqObjectTran.GetValue('CONTNO').Value;
+          Open;
+        end;
+        Cuscode  := Query1.FieldByName('CUSCOD').AsString;
+        Contid   := Query1.FieldByName('IDNO').AsInteger;
+        Locatpay := Query1.FieldByName('LOCAT').AsString;
+      end
+      else if (RqObjectTran.GetValue('TSALE').Value = 'R') then
+      begin
+        with Query1 do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT IDNO, CUSCOD, LOCAT FROM ARRESV WHERE RESVNO =:0 ');
+          Params[0].AsString := RqObjectTran.GetValue('CONTNO').Value;
+          Open;
+        end;
+        Cuscode  := Query1.FieldByName('CUSCOD').AsString;
+        Contid   := Query1.FieldByName('IDNO').AsInteger;
+        Locatpay := Query1.FieldByName('LOCAT').AsString;
+      end
+      else
+      begin
+        with Query1 do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT IDNO, CUSCOD, LOCAT  FROM VWSALE WHERE CONTNO =:0 ');
+          Params[0].AsString := RqObjectTran.GetValue('CONTNO').Value;
+          Open;
+        end;
+        Cuscode  := Query1.FieldByName('CUSCOD').AsString;
+        Contid   := Query1.FieldByName('IDNO').AsInteger;
+        Locatpay := Query1.FieldByName('LOCAT').AsString;
+      end;
+      //Convert data to record
+      QPost.Append;
+      QPost.FieldByName('TMBILDT').AsDateTime := StrToDate(RqObjectTran.GetValue('TMBILDT').Value);
+      //Running TMBILL and BILLNO
+      if QDBConfig.Fieldbyname('R_TMPBILL').asstring = 'Y' then
+      begin
+        HF := 'H_TMPBILL';
+        LF := 'L_TMPBILL';
+        LV := locat;
+        DV := QPost.FieldByName('TMBILDT').AsDateTime;
+        QPost.FieldByName('TMBILL').AsString := RunNo(HF, LF, LV, DV);
+      end
+      else
+      begin
+        QPost.FieldByName('TMBILL').AsString := RqObjectTran.GetValue('TMBILL').Value;
+      end;
+      if QDBConfig.Fieldbyname('R_BILLNO').asstring = 'Y' then
+      begin
+        if RqObjectTran.GetValue('PAYFOR').Value = '001' then
+        begin
+          THF := 'H_BILLCSH';
+          TLF := 'L_BILLCSH';
+        end
+        else if RqObjectTran.GetValue('PAYFOR').Value = '002' then
+        begin
+          THF := 'H_BILLDAWN';
+          TLF := 'L_BILLDAWN';
+        end
+        else if RqObjectTran.GetValue('PAYFOR').Value = '003' then
+        begin
+          THF := 'H_BILLFINDWN';
+          TLF := 'L_BILLFIN';
+        end
+        else if RqObjectTran.GetValue('PAYFOR').Value = '004' then
+        begin
+          THF := 'H_BILLFIN';
+          TLF := 'L_BILLFINF';
+        end
+        else if (RqObjectTran.GetValue('PAYFOR').Value = '006') or
+                (RqObjectTran.GetValue('PAYFOR').Value = '007') then
+        begin
+          THF := 'H_BILLPAY';
+          TLF := 'L_BILLPAY';
+        end
+        else if RqObjectTran.GetValue('PAYFOR').Value = '008' then
+        begin
+          THF := 'H_BILLRESV';
+          TLF := 'L_BILLRESV';
+        end
+        else if RqObjectTran.GetValue('PAYFOR').Value = '009' then
+        begin
+          THF := 'H_BILLAGEN';
+          TLF := 'L_BILLAGEN';
+        end
+        else if RqObjectTran.GetValue('PAYFOR').Value = '901' then
+        begin
+          THF := 'H_BILLOTH';
+          TLF := 'L_BILLOTH';
+        end
+        else if ((copy(RqObjectTran.GetValue('PAYFOR').Value, 1, 1) <> '0') or
+                 (copy(RqObjectTran.GetValue('PAYFOR').Value, 1, 1) <> '9') or
+                 (RqObjectTran.GetValue('PAYFOR').Value = '011') or
+                 (RqObjectTran.GetValue('PAYFOR').Value = '017')) and
+                 (Taxfl = 'Y') then
+        begin
+          THF := 'H_BILLTX';
+          TLF := 'L_BILLTX';
+        end
+        else
+        begin
+          THF := 'H_BILLINT';
+          TLF := 'L_BILLINT';
+        end;
+        LV := locat;
+        DV := QPost.FieldByName('TMBILDT').AsDateTime;
+        QPost.FieldByName('BILLNO').AsString := RunNo(THF, TLF, LV, DV);
+      end
+      else
+      begin
+        QPost.FieldByName('BILLNO').AsString := RqObjectTran.GetValue('BILLNO').Value;
+      end;
+      QPost.FieldByName('VATRT').AsFloat      := StrToFloat(RqObjectTran.GetValue('VATRT').Value);
+      QPost.FieldByName('LOCATRECV').AsString := RqObjectTran.GetValue('LOCATRECV').Value;
+      QPost.FieldByName('CUSCOD').AsString    := Cuscode;
+      QPost.FieldByName('CONTNO').AsString    := RqObjectTran.GetValue('CONTNO').Value;
+      QPost.FieldByName('TSALE').AsString     := RqObjectTran.GetValue('TSALE').Value;
+      QPost.FieldByName('TPAYAMT').AsFloat    := StrToFloat(RqObjectTran.GetValue('TPAYAMT').Value);
+      QPost.FieldByName('TPAYAMT_V').AsFloat  := FRound((QPost.FieldByName('TPAYAMT').AsFloat*QPost.FieldByName('VATRT').AsFloat)/(100+QPost.FieldByName('VATRT').AsFloat),2);
+      QPost.FieldByName('TPAYAMT_N').AsFloat  := QPost.FieldByName('TPAYAMT').AsFloat-QPost.FieldByName('TPAYAMT_V').AsFloat;
+      QPost.FieldByName('TAXFL').AsString     := Taxfl;
+      if ((Taxfl = 'Y') and
+         ((Copy(RqObjectTran.GetValue('PAYFOR').Value,1,1)<>'0' ) or
+         (RqObjectTran.GetValue('PAYFOR').Value = '007') or
+         (RqObjectTran.GetValue('PAYFOR').Value = '003') or
+         (RqObjectTran.GetValue('PAYFOR').Value = '011') or
+         (RqObjectTran.GetValue('PAYFOR').Value = '017') or
+         (RqObjectTran.GetValue('PAYFOR').Value = '015'))) then
+      begin
+        with QPost4 do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM TAXTRAN WHERE IDNO IS NULL ');
+          Open;
+        end;
+        QPost4.Insert;
+        QPost4.Fieldbyname('LOCAT').Asstring   := Locatpay;
+        QPost4.fieldbyname('TAXDT').asdatetime := Now;
+        if (RqObjectTran.GetValue('PAYFOR').Value = '011') or
+           (RqObjectTran.GetValue('PAYFOR').Value = '017') or
+           (RqObjectTran.GetValue('PAYFOR').Value = '015') or
+           (RqObjectTran.GetValue('PAYFOR').Value = '003') then
+        begin
+          QPost4.Fieldbyname('Tsale').Asstring  := 'F';
+          QPost4.Fieldbyname('Taxtyp').Asstring := 'O';
+          QPost4.Fieldbyname('Vatrt').Asfloat   := QPost.Fieldbyname('Vatrt').Asfloat;
+        end
+        else
+        begin
+          QPost4.Fieldbyname('Tsale').Asstring  := 'O';
+          QPost4.Fieldbyname('Taxtyp').Asstring := 'O';
+          QPost4.Fieldbyname('Vatrt').Asfloat   := QPost.Fieldbyname('Vatrt').Asfloat;
+        end;
+        if ((Copy(RqObjectTran.GetValue('PAYFOR').Value, 1, 1) <> '0') or
+            (RqObjectTran.GetValue('PAYFOR').Value = '015') or
+            (RqObjectTran.GetValue('PAYFOR').Value = '003')) and
+            (RqObjectTran.GetValue('PAYFOR').Value <> '200') and
+            (RqObjectTran.GetValue('PAYFOR').Value <> '011') and
+            (RqObjectTran.GetValue('PAYFOR').Value <> '017') then
+        begin
+          HF := 'H_TXOTHR';
+          LF := 'L_TXOTHR';
+        end
+        else if (RqObjectTran.GetValue('PAYFOR').Value = '007') then
+        begin
+          HF := 'H_TXPAY';
+          LF := 'L_TXPAY';
+        end
+        else if (RqObjectTran.GetValue('PAYFOR').Value = '200') then
+        begin
+          HF := 'H_TXV';
+          LF := 'L_TXV';
+        end
+        else if (RqObjectTran.GetValue('PAYFOR').Value = '011') or
+                (RqObjectTran.GetValue('PAYFOR').Value = '017') then
+        begin
+          HF := 'H_TXE';
+          LF := 'L_TXE';
+        end;
+        LV := QPost4.Fieldbyname('LOCAT').Asstring;
+        DV := QPost4.FieldByName('TAXDT').AsDateTime;
+        QPost4.FieldByName('TAXNO').AsString     := RunNo(HF, LF, LV, DV);
+        QPost.FieldByName('TAXNO').AsString      := QPost4.FieldByName('TAXNO').AsString;
+        QPost4.Fieldbyname('TMBILLID').AsInteger := 0;
+        QPost4.Fieldbyname('Contno').AsString    := QPost.Fieldbyname('Contno').AsString;
+        QPost4.Fieldbyname('Cuscod').AsString    := QPost.Fieldbyname('Cuscod').AsString;
+        QPost4.Fieldbyname('Descp').Asstring     := Taxdesc;
+        QPost4.Fieldbyname('Totamt').Asfloat     := QPost.FieldByName('TPAYAMT').AsFloat;
+        QPost4.Fieldbyname('Vatamt').Asfloat     := QPost.FieldByName('TPAYAMT_V').AsFloat;
+        QPost4.Fieldbyname('Netamt').Asfloat     := QPost.FieldByName('TPAYAMT_N').AsFloat;
+        QPost4.Fieldbyname('TAXFLG').Asstring    := 'N';
+        QPost4.Fieldbyname('InPutDt').AsDateTime := Now;
+        QPost4.Fieldbyname('USERID').Asstring    := RqObjectTran.GetValue('USERID').Value;
+      end;
+      QPost.FieldByName('MEMO1').AsString     := RqObjectTran.GetValue('MEMO1').Value;
+      QPost.FieldByName('INPUTDT').AsDateTime := Now;
+      QPost.FieldByName('USERID').AsString    := RqObjectTran.GetValue('USERID').Value;
+      docno := QPost.FieldByName('TMBILL').AsString;
+    end;
+    QPost.First;
+    //Get Data CHQTRAN
+    RqObjectMaster := LJsonArr.Items[1] as TJSONObject;
+    table := RqObjectMaster.GetValue('table').Value;
+    value := RqObjectMaster.GetValue('value').ToJSON;
+    if table = 'CHQTRAN' then
+    begin
+      ja := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+      with QPost2 do
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Add('SELECT * FROM CHQTRAN WHERE IDNO IS NULL ');
+        Open;
+      end;
+
+      //Edit old data and Insert new data
+      for I := 0 to ja.Count - 1 do
+      begin
+        RqObjectTran := ja.Items[I] as TJSONObject;
+        QPost2.Append;
+        QPost2.FieldByName('LOCATRECV').AsString := RqObjectTran.GetValue('LOCATRECV').Value;
+        QPost2.FieldByName('TMBILDT').AsDateTime := StrToDate(RqObjectTran.GetValue('TMBILDT').Value);
+        QPost2.FieldByName('CHQMASID').AsInteger := 0;
+        QPost2.FieldByName('CONTID').AsInteger   := Contid;
+        QPost2.FieldByName('CONTNO').AsString    := QPost.FieldByName('CONTNO').AsString;
+        If RqObjectTran.GetValue('PAYFOR').Value = '001' Then QPost2.FieldByName('TSALE').Asstring := 'C' Else
+        If RqObjectTran.GetValue('PAYFOR').Value = '002' Then QPost2.FieldByName('TSALE').Asstring := 'H' Else
+        If RqObjectTran.GetValue('PAYFOR').Value = '003' Then QPost2.FieldByName('TSALE').Asstring := 'F' Else
+        If RqObjectTran.GetValue('PAYFOR').Value = '004' Then QPost2.FieldByName('TSALE').Asstring := 'F' Else
+        If RqObjectTran.GetValue('PAYFOR').Value = '005' Then QPost2.FieldByName('TSALE').Asstring := 'O' Else
+        If RqObjectTran.GetValue('PAYFOR').Value = '901' Then QPost2.FieldByName('TSALE').Asstring := 'H' Else
+        If RqObjectTran.GetValue('PAYFOR').Value = '006' Then QPost2.FieldByName('TSALE').Asstring := 'H' Else
+        If RqObjectTran.GetValue('PAYFOR').Value = '007' Then QPost2.FieldByName('TSALE').Asstring := 'H' Else
+        If RqObjectTran.GetValue('PAYFOR').Value = '012' Then QPost2.FieldByName('TSALE').Asstring := 'H' Else
+        If RqObjectTran.GetValue('PAYFOR').Value = '013' Then QPost2.FieldByName('TSALE').Asstring := 'H' Else
+        If RqObjectTran.GetValue('PAYFOR').Value = '008' Then QPost2.FieldByName('TSALE').Asstring := 'R' Else
+        If RqObjectTran.GetValue('PAYFOR').Value = '009' Then QPost2.FieldByName('TSALE').Asstring := 'A' Else
+        If RqObjectTran.GetValue('PAYFOR').Value = '015' Then QPost2.FieldByName('TSALE').Asstring := 'F' Else
+        If RqObjectTran.GetValue('PAYFOR').Value = '011' Then QPost2.FieldByName('TSALE').Asstring := 'F' Else
+        If RqObjectTran.GetValue('PAYFOR').Value = '017' Then QPost2.FieldByName('TSALE').Asstring := 'F' Else
+        begin
+          QPost2.FieldByName('TSALE').AsString := QPost.FieldByName('TSALE').AsString;
+        end;
+        QPost2.FieldByName('PAYFOR').AsString    := RqObjectTran.GetValue('PAYFOR').Value;
+        QPost2.FieldByName('VATRT').AsFloat      := QPost.FieldByName('VATRT').AsFloat;
+        QPost2.FieldByName('PAYAMT').AsFloat     := StrToFloat(RqObjectTran.GetValue('PAYAMT').Value);
+        QPost2.FieldByName('DISCT').AsFloat      := StrToFloat(RqObjectTran.GetValue('DISCT').Value);
+        QPost2.FieldByName('NETPAY').AsFloat     := StrToFloat(RqObjectTran.GetValue('NETPAY').Value);
+        QPost2.FieldByName('LOCATPAY').AsString  := Locatpay;
+        QPost2.FieldByName('TAXNO').AsString     := QPost.FieldByName('TAXNO').AsString;
+        QPost2.FieldByName('TAXFL').AsString     := Taxfl;
+        QPost2.FieldByName('INPUTDT').AsDateTime := Now;
+        QPost2.FieldByName('USERID').AsString    := RqObjectTran.GetValue('USERID').Value;
+      end;
+    end;
+    //Get Data CHQTYPE
+    RqObjectMaster := LJsonArr.Items[2] as TJSONObject;
+    table := RqObjectMaster.GetValue('table').Value;
+    value := RqObjectMaster.GetValue('value').ToJSON;
+    if table = 'CHQTYPE' then
+    begin
+      ja := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+      with QPost3 do
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Add('SELECT * FROM CHQTYPE WHERE IDNO IS NULL ');
+        Open;
+      end;
+      //Edit old data and Insert new data
+      for I := 0 to ja.Count - 1 do
+      begin
+        RqObjectTran := ja.Items[I] as TJSONObject;
+        QPost3.Append;
+        QPost3.FieldByName('CHQMASID').AsInteger := 0;
+        QPost3.FieldByName('PAYCODE').AsString   := RqObjectTran.GetValue('PAYCODE').Value;
+        QPost3.FieldByName('REFNO').AsString     := RqObjectTran.GetValue('REFNO').Value;
+        QPost3.FieldByName('AMOUNT').AsFloat     := StrToFloat(RqObjectTran.GetValue('AMOUNT').Value);
+        QPost3.FieldByName('INPUTDT').AsDateTime := Now;
+        QPost3.FieldByName('USERID').AsString    := RqObjectTran.GetValue('USERID').Value;
+      end;
+    end;
+    QPost3.First;
+    QPost.Edit;
+    QPost.FieldByName('PAYTYP').AsString := QPost3.FieldByName('PAYCODE').AsString;
+
+    //StartTransaction
+    UniConnection1.StartTransaction;
+    try
+      if QPost.Active then
+        QPost.ApplyUpdates;
+      with Query1 do
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Add('SELECT * FROM CHQMAS WHERE TMBILL =:V1 ');
+        Params.ParamByName('V1').AsString := docno;
+        Open;
+      end;
+      Chqmasid := Query1.FieldByName('IDNO').AsInteger;
+      QPost2.First;
+      while not QPost2.Eof  do
+      begin
+        QPost2.Edit;
+        QPost2.FieldByName('CHQMASID').AsInteger := Chqmasid;
+        QPost2.Next;
+      end;
+      QPost3.First;
+      while not QPost3.Eof  do
+      begin
+        QPost3.Edit;
+        QPost3.FieldByName('CHQMASID').AsInteger := Chqmasid;
+        QPost3.Next;
+      end;
+      if QPost4.Active then
+      begin
+        QPost4.First;
+        while not QPost4.Eof  do
+        begin
+          QPost4.Edit;
+          QPost4.FieldByName('TMBILLID').AsInteger := Chqmasid;
+          QPost4.Next;
+        end;
+      end;
+      if QPost2.Active then
+        QPost2.ApplyUpdates;
+      if QPost3.Active then
+        QPost3.ApplyUpdates;
+      if QPost4.Active then
+        QPost4.ApplyUpdates;
+      if QLastno.Active then
+        QLastno.ApplyUpdates;
+      UniConnection1.Commit;
+    except
+      UniConnection1.Rollback;
+      Return := 'false';
+      //Response Data
+      Response.ContentType := 'application/json;charset=UTF-8';
+      Response.Content := Return;
+      raise;
+    end;
+    if QPost.Active then
+      QPost.CommitUpdates;
+    if QPost2.Active then
+      QPost2.CommitUpdates;
+    if QPost3.Active then
+      QPost3.CommitUpdates;
+    if QPost4.Active then
+      QPost4.CommitUpdates;
+    if QLastno.Active then
+      QLastno.CommitUpdates;
+    Return := 'true';
+      //Response Data
+
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := '[{ "save": ' + Return + ', "tmbill": "' + docno + '" }]';
   end
   else
   begin

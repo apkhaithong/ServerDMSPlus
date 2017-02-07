@@ -14,7 +14,8 @@ uses
   DataSetConverter4D.Helper in 'DataSetConverter4D.Helper.pas',
   DataSetConverter4D.Impl in 'DataSetConverter4D.Impl.pas',
   DataSetConverter4D in 'DataSetConverter4D.pas',
-  DataSetConverter4D.Util in 'DataSetConverter4D.Util.pas';
+  DataSetConverter4D.Util in 'DataSetConverter4D.Util.pas',
+  Functn01 in 'Functn01.pas';
 
 {$R *.res}
 

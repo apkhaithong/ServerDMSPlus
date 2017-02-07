@@ -462,6 +462,11 @@ object WebModule1: TWebModule1
       Name = 'fin_chqmas'
       PathInfo = '/fin_chqmas'
       Producer = fin_chqmas
+    end
+    item
+      Name = 'saveChqmas'
+      PathInfo = '/saveChqmas'
+      OnAction = WebModule1saveChqmasAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 733
@@ -605,6 +610,7 @@ object WebModule1: TWebModule1
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
+    Options.RequiredFields = False
     Left = 577
     Top = 16
   end
@@ -1416,6 +1422,7 @@ object WebModule1: TWebModule1
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
+    Options.RequiredFields = False
     Left = 577
     Top = 72
   end
@@ -1423,6 +1430,7 @@ object WebModule1: TWebModule1
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
+    Options.RequiredFields = False
     Left = 577
     Top = 128
   end
@@ -1596,6 +1604,7 @@ object WebModule1: TWebModule1
   object QPost3: TUniQuery
     Connection = UniConnection1
     CachedUpdates = True
+    Options.RequiredFields = False
     Left = 625
     Top = 128
   end
@@ -1603,5 +1612,12 @@ object WebModule1: TWebModule1
     HTMLFile = 'templates\fin_chqmas.html'
     Left = 49
     Top = 504
+  end
+  object QPost4: TUniQuery
+    Connection = UniConnection1
+    CachedUpdates = True
+    Options.RequiredFields = False
+    Left = 625
+    Top = 72
   end
 end
