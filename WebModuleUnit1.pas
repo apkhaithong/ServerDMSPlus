@@ -407,8 +407,8 @@ begin
       Value := ParamsReport.Values['payfor'] + '%';
     if Uppercase(VarName) = 'VPAYTYP' then
       Value := ParamsReport.Values['paytyp'] + '%';
-  end;
-  if ParamsReport.Values['reportname'] = 'fr_receivestk' then
+  end
+  else
   begin
     if Uppercase(VarName) = 'VDOCNO' then
       Value := ParamsReport.Values['vdocno'];

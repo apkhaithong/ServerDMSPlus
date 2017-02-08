@@ -1552,7 +1552,7 @@ object WebModule1: TWebModule1
     Top = 448
   end
   object sale_arresv: TPageProducer
-    HTMLFile = 'templates\sale_acard.html'
+    HTMLFile = 'templates\sale_arresv.html'
     Left = 297
     Top = 448
   end
