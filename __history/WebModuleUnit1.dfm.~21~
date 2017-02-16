@@ -457,9 +457,29 @@ object WebModule1: TWebModule1
       Name = 'saveCustmast'
       PathInfo = '/saveCustmast'
       OnAction = WebModule1saveCustmastAction
+    end
+    item
+      Name = 'fin_chqmas'
+      PathInfo = '/fin_chqmas'
+      Producer = fin_chqmas
+    end
+    item
+      Name = 'saveChqmas'
+      PathInfo = '/saveChqmas'
+      OnAction = WebModule1saveChqmasAction
+    end
+    item
+      Name = 'cancelChqmas'
+      PathInfo = '/cancelChqmas'
+      OnAction = WebModule1cancelChqmasAction
+    end
+    item
+      Name = 'saveOptinvoi'
+      PathInfo = '/saveOptinvoi'
+      OnAction = WebModule1saveOptinvoiAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
-  Height = 589
+  Height = 733
   Width = 1142
   object DSServer1: TDSServer
     Left = 49
@@ -591,7 +611,6 @@ object WebModule1: TWebModule1
   end
   object QGet: TUniQuery
     Connection = UniConnection1
-    Transaction = UniTransaction1
     SQL.Strings = (
       'select * from setgroup')
     Left = 497
@@ -601,6 +620,7 @@ object WebModule1: TWebModule1
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
+    Options.RequiredFields = False
     Left = 577
     Top = 16
   end
@@ -1216,7 +1236,7 @@ object WebModule1: TWebModule1
   object rp_receiptdaily: TPageProducer
     HTMLFile = 'templates\rp_receiptdaily.html'
     Left = 33
-    Top = 520
+    Top = 656
   end
   object login: TPageProducer
     HTMLFile = 'templates\login.html'
@@ -1412,6 +1432,7 @@ object WebModule1: TWebModule1
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
+    Options.RequiredFields = False
     Left = 577
     Top = 72
   end
@@ -1419,19 +1440,18 @@ object WebModule1: TWebModule1
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
+    Options.RequiredFields = False
     Left = 577
     Top = 128
   end
   object QLastno: TUniQuery
     Connection = UniConnection1
-    Transaction = UniTransaction1
     CachedUpdates = True
     Left = 497
     Top = 72
   end
   object Query1: TUniQuery
     Connection = UniConnection1
-    Transaction = UniTransaction1
     Left = 497
     Top = 128
   end
@@ -1445,7 +1465,6 @@ object WebModule1: TWebModule1
   end
   object QDBConfig: TUniQuery
     Connection = UniConnection1
-    Transaction = UniTransaction1
     SQL.Strings = (
       'SELECT * FROM DBCONFIG WHERE LOCATCD =:LOCAT')
     Left = 761
@@ -1543,7 +1562,7 @@ object WebModule1: TWebModule1
     Top = 448
   end
   object sale_arresv: TPageProducer
-    HTMLFile = 'templates\sale_acard.html'
+    HTMLFile = 'templates\sale_arresv.html'
     Left = 297
     Top = 448
   end
@@ -1595,7 +1614,20 @@ object WebModule1: TWebModule1
   object QPost3: TUniQuery
     Connection = UniConnection1
     CachedUpdates = True
+    Options.RequiredFields = False
     Left = 625
     Top = 128
+  end
+  object fin_chqmas: TPageProducer
+    HTMLFile = 'templates\fin_chqmas.html'
+    Left = 49
+    Top = 504
+  end
+  object QPost4: TUniQuery
+    Connection = UniConnection1
+    CachedUpdates = True
+    Options.RequiredFields = False
+    Left = 625
+    Top = 72
   end
 end
