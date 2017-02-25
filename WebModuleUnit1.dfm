@@ -477,6 +477,11 @@ object WebModule1: TWebModule1
       Name = 'saveOptinvoi'
       PathInfo = '/saveOptinvoi'
       OnAction = WebModule1saveOptinvoiAction
+    end
+    item
+      Name = 'saveMcmast'
+      PathInfo = '/saveMcmast'
+      OnAction = WebModule1saveMcmastAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 733
