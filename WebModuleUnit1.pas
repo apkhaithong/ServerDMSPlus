@@ -147,6 +147,8 @@ type
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure WebModule1saveMcmastAction(Sender: TObject; Request: TWebRequest;
       Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1saveAdjstkAction(Sender: TObject; Request: TWebRequest;
+      Response: TWebResponse; var Handled: Boolean);
   private
     { Private declarations }
     XSchema: string;
@@ -1134,6 +1136,134 @@ begin
     begin
       Response.Content := Page404.Content;
     end;
+  end;
+end;
+
+procedure TWebModule1.WebModule1saveAdjstkAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  ja, LJsonArr: TJSONArray;
+  jo, RqObjectMaster, RqObjectTran: TJSONObject;
+  status, table, key, value, Return, locat, HF, LF, LV, S, docno: string;
+  I, J, K: integer;
+  DV, docdt: TdateTime;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Get Data ADJSTK
+    RqObjectMaster := LJsonArr.Items[0] as TJSONObject;
+    table := RqObjectMaster.GetValue('table').Value;
+    locat := RqObjectMaster.GetValue('locat').Value;
+    value := RqObjectMaster.GetValue('value').ToJSON;
+    status := RqObjectMaster.GetValue('status').Value;
+    key := RqObjectMaster.GetValue('key').Value;
+    if table = 'ADJSTK' then
+    begin
+      ja := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+      if (status = 'insert') then
+      begin
+        with QPost do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM ADJSTK WHERE IDNO IS NULL ');
+          Open;
+        end;
+        HF := 'H_ARLET';
+        LF := 'L_ARET';
+        if not QDBConfig.Active then
+        begin
+          QDBConfig.ParamByName('LOCAT').AsString := locat;
+          QDbconfig.Open;
+        end;
+        RqObjectTran := ja.Items[0] as TJSONObject;
+        //Convert data to record
+        QPost.Append;
+        QPost.FieldByName('ADJDT').AsDateTime := StrToDate(RqObjectTran.GetValue('ADJDT').Value);
+        if QDBConfig.Fieldbyname('R_ARLET').asstring = 'Y' then
+        begin
+          LV := locat;
+          DV := QPost.FieldByName('ADJDT').AsDateTime;
+          QPost.FieldByName('ADJNO').AsString := RunNo(HF, LF, LV, DV);
+        end
+        else
+        begin
+          QPost.FieldByName('ADJNO').AsString := RqObjectTran.GetValue('ADJNO').Value;
+        end;
+        QPost.FieldByName('LOCAT').AsString     := RqObjectTran.GetValue('LOCAT').Value;
+        QPost.FieldByName('STRNO').AsString     := RqObjectTran.GetValue('STRNO').Value;
+        QPost.FieldByName('NETCOST').AsFloat    := StrToFloat(RqObjectTran.GetValue('NETCOST').Value);
+        QPost.FieldByName('CRVAT').AsFloat      := StrToFloat(RqObjectTran.GetValue('CRVAT').Value);
+        QPost.FieldByName('TOTCOST').AsFloat    := StrToFloat(RqObjectTran.GetValue('TOTCOST').Value);
+        QPost.FieldByName('STDPRC').AsFloat     := StrToFloat(RqObjectTran.GetValue('STDPRC').Value);
+        QPost.FieldByName('USERID').AsString    := RqObjectTran.GetValue('USERID').Value;
+        QPost.FieldByName('INPUTDT').AsDateTime := Now;
+        QPost.FieldByName('APCODE').AsString    := RqObjectTran.GetValue('APCODE').Value;
+        QPost.FieldByName('VATRT').AsFloat      := StrToFloat(RqObjectTran.GetValue('VATRT').Value);
+        QPost.FieldByName('STAT').AsString      := RqObjectTran.GetValue('STAT').Value;
+        docno := QPost.FieldByName('ADJNO').AsString;
+        docdt := QPost.FieldByName('ADJDT').AsDateTime;
+      end
+      else
+      begin
+        with QPost do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM ADJSTK WHERE ADJNO = :V1 ');
+          Params.ParamByName('V1').AsString := key;
+          Open;
+        end;
+        RqObjectTran := ja.Items[0] as TJSONObject;
+        //Convert data to record
+        QPost.Edit;
+        QPost.FieldByName('ADJDT').AsDateTime   := StrToDate(RqObjectTran.GetValue('ADJDT').Value);
+        QPost.FieldByName('LOCAT').AsString     := RqObjectTran.GetValue('LOCAT').Value;
+        QPost.FieldByName('STRNO').AsString     := RqObjectTran.GetValue('STRNO').Value;
+        QPost.FieldByName('NETCOST').AsFloat    := StrToFloat(RqObjectTran.GetValue('NETCOST').Value);
+        QPost.FieldByName('CRVAT').AsFloat      := StrToFloat(RqObjectTran.GetValue('CRVAT').Value);
+        QPost.FieldByName('TOTCOST').AsFloat    := StrToFloat(RqObjectTran.GetValue('TOTCOST').Value);
+        QPost.FieldByName('STDPRC').AsFloat     := StrToFloat(RqObjectTran.GetValue('STDPRC').Value);
+        QPost.FieldByName('USERID').AsString    := RqObjectTran.GetValue('USERID').Value;
+        QPost.FieldByName('APCODE').AsString    := RqObjectTran.GetValue('APCODE').Value;
+        QPost.FieldByName('VATRT').AsFloat      := StrToFloat(RqObjectTran.GetValue('VATRT').Value);
+        QPost.FieldByName('STAT').AsString      := RqObjectTran.GetValue('STAT').Value;
+        docno := QPost.FieldByName('ADJNO').AsString;
+        docdt := QPost.FieldByName('ADJDT').AsDateTime;
+      end;
+    end;
+
+    //StartTransaction
+    UniConnection1.StartTransaction;
+    try
+      if QPost.Active then
+        QPost.ApplyUpdates;
+      if QLastno.Active then
+        QLastno.ApplyUpdates;
+      UniConnection1.Commit;
+    except
+      UniConnection1.Rollback;
+      Return := 'false';
+      //Response Data
+      Response.ContentType := 'application/json;charset=UTF-8';
+      Response.Content := Return;
+      raise;
+    end;
+    if QPost.Active then
+      QPost.CommitUpdates;
+    if QLastno.Active then
+      QLastno.CommitUpdates;
+    Return := 'true';
+      //Response Data
+
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := '[{ "save": ' + Return + ', "adjno": "' + docno + '" }]';
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
   end;
 end;
 

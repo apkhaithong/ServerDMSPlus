@@ -482,6 +482,11 @@ object WebModule1: TWebModule1
       Name = 'saveMcmast'
       PathInfo = '/saveMcmast'
       OnAction = WebModule1saveMcmastAction
+    end
+    item
+      Name = 'saveAdjstk'
+      PathInfo = '/saveAdjstk'
+      OnAction = WebModule1saveAdjstkAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 733

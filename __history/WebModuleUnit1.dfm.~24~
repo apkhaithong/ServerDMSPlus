@@ -467,6 +467,21 @@ object WebModule1: TWebModule1
       Name = 'saveChqmas'
       PathInfo = '/saveChqmas'
       OnAction = WebModule1saveChqmasAction
+    end
+    item
+      Name = 'cancelChqmas'
+      PathInfo = '/cancelChqmas'
+      OnAction = WebModule1cancelChqmasAction
+    end
+    item
+      Name = 'saveOptinvoi'
+      PathInfo = '/saveOptinvoi'
+      OnAction = WebModule1saveOptinvoiAction
+    end
+    item
+      Name = 'saveMcmast'
+      PathInfo = '/saveMcmast'
+      OnAction = WebModule1saveMcmastAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 733
@@ -610,6 +625,7 @@ object WebModule1: TWebModule1
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
+    Options.RequiredFields = False
     Left = 577
     Top = 16
   end
@@ -1421,6 +1437,7 @@ object WebModule1: TWebModule1
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
+    Options.RequiredFields = False
     Left = 577
     Top = 72
   end
@@ -1428,6 +1445,7 @@ object WebModule1: TWebModule1
     Connection = UniConnection1
     Transaction = UniTransaction1
     CachedUpdates = True
+    Options.RequiredFields = False
     Left = 577
     Top = 128
   end
@@ -1549,7 +1567,7 @@ object WebModule1: TWebModule1
     Top = 448
   end
   object sale_arresv: TPageProducer
-    HTMLFile = 'templates\sale_acard.html'
+    HTMLFile = 'templates\sale_arresv.html'
     Left = 297
     Top = 448
   end
@@ -1601,6 +1619,7 @@ object WebModule1: TWebModule1
   object QPost3: TUniQuery
     Connection = UniConnection1
     CachedUpdates = True
+    Options.RequiredFields = False
     Left = 625
     Top = 128
   end
@@ -1612,6 +1631,7 @@ object WebModule1: TWebModule1
   object QPost4: TUniQuery
     Connection = UniConnection1
     CachedUpdates = True
+    Options.RequiredFields = False
     Left = 625
     Top = 72
   end
