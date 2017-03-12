@@ -467,6 +467,26 @@ object WebModule1: TWebModule1
       Name = 'saveChqmas'
       PathInfo = '/saveChqmas'
       OnAction = WebModule1saveChqmasAction
+    end
+    item
+      Name = 'cancelChqmas'
+      PathInfo = '/cancelChqmas'
+      OnAction = WebModule1cancelChqmasAction
+    end
+    item
+      Name = 'saveOptinvoi'
+      PathInfo = '/saveOptinvoi'
+      OnAction = WebModule1saveOptinvoiAction
+    end
+    item
+      Name = 'saveMcmast'
+      PathInfo = '/saveMcmast'
+      OnAction = WebModule1saveMcmastAction
+    end
+    item
+      Name = 'saveAdjstk'
+      PathInfo = '/saveAdjstk'
+      OnAction = WebModule1saveAdjstkAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 733
@@ -1552,7 +1572,7 @@ object WebModule1: TWebModule1
     Top = 448
   end
   object sale_arresv: TPageProducer
-    HTMLFile = 'templates\sale_acard.html'
+    HTMLFile = 'templates\sale_arresv.html'
     Left = 297
     Top = 448
   end
