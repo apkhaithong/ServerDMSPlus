@@ -487,6 +487,61 @@ object WebModule1: TWebModule1
       Name = 'saveAdjstk'
       PathInfo = '/saveAdjstk'
       OnAction = WebModule1saveAdjstkAction
+    end
+    item
+      Name = 'saveInvmovm'
+      PathInfo = '/saveInvmovm'
+      OnAction = WebModule1saveInvmovmAction
+    end
+    item
+      Name = 'saveCompAsset'
+      PathInfo = '/saveCompAsset'
+      OnAction = WebModule1saveCompAssetAction
+    end
+    item
+      Name = 'cancelCompAsset'
+      PathInfo = '/cancelCompAsset'
+      OnAction = WebModule1cancelCompAssetAction
+    end
+    item
+      Name = 'saveLocatparking'
+      PathInfo = '/saveLocatparking'
+      OnAction = WebModule1saveLocatparkingAction
+    end
+    item
+      Name = 'fin_chqstat'
+      PathInfo = '/fin_chqstat'
+      Producer = fin_chqstat
+    end
+    item
+      Name = 'fin_chqpayin'
+      PathInfo = '/fin_chqpayin'
+      Producer = fin_chqpayin
+    end
+    item
+      Name = 'fin_chqpass'
+      PathInfo = '/fin_chqpass'
+      Producer = fin_chqpass
+    end
+    item
+      Name = 'fin_chqreturn'
+      PathInfo = '/fin_chqreturn'
+      Producer = fin_chqreturn
+    end
+    item
+      Name = 'fin_cancelchqpass'
+      PathInfo = '/fin_cancelchqpass'
+      Producer = fin_cancelchqpass
+    end
+    item
+      Name = 'fin_cancelchqreturn'
+      PathInfo = '/fin_cancelchqreturn'
+      Producer = fin_cancelchqreturn
+    end
+    item
+      Name = 'saveChqstat'
+      PathInfo = '/saveChqstat'
+      OnAction = WebModule1saveChqstatAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 733
@@ -1260,12 +1315,12 @@ object WebModule1: TWebModule1
   end
   object set_setmodel: TPageProducer
     HTMLFile = 'templates\set_setmodel.html'
-    Left = 129
+    Left = 137
     Top = 192
   end
   object set_setbaab: TPageProducer
     HTMLFile = 'templates\set_setbaab.html'
-    Left = 210
+    Left = 217
     Top = 192
   end
   object set_setgroup: TPageProducer
@@ -1325,12 +1380,12 @@ object WebModule1: TWebModule1
   end
   object set_typhold: TPageProducer
     HTMLFile = 'templates\set_typhold.html'
-    Left = 129
+    Left = 137
     Top = 240
   end
   object set_argroup: TPageProducer
     HTMLFile = 'templates\set_argroup.html'
-    Left = 210
+    Left = 217
     Top = 240
   end
   object set_setgrade: TPageProducer
@@ -1385,12 +1440,12 @@ object WebModule1: TWebModule1
   end
   object set_setacti: TPageProducer
     HTMLFile = 'templates\set_setacti.html'
-    Left = 129
+    Left = 137
     Top = 288
   end
   object set_setreson: TPageProducer
     HTMLFile = 'templates\set_setreson.html'
-    Left = 210
+    Left = 217
     Top = 288
   end
   object set_garmast: TPageProducer
@@ -1493,12 +1548,12 @@ object WebModule1: TWebModule1
   end
   object set_table1: TPageProducer
     HTMLFile = 'templates\set_table1.html'
-    Left = 129
+    Left = 137
     Top = 336
   end
   object set_intrmast: TPageProducer
     HTMLFile = 'templates\set_intrmast.html'
-    Left = 210
+    Left = 217
     Top = 336
   end
   object set_dbconfig: TPageProducer
@@ -1639,5 +1694,35 @@ object WebModule1: TWebModule1
     Options.RequiredFields = False
     Left = 625
     Top = 72
+  end
+  object fin_chqstat: TPageProducer
+    HTMLFile = 'templates\fin_chqstat.html'
+    Left = 137
+    Top = 504
+  end
+  object fin_chqpayin: TPageProducer
+    HTMLFile = 'templates\fin_chqpayin.html'
+    Left = 217
+    Top = 504
+  end
+  object fin_chqpass: TPageProducer
+    HTMLFile = 'templates\fin_chqpass.html'
+    Left = 297
+    Top = 504
+  end
+  object fin_chqreturn: TPageProducer
+    HTMLFile = 'templates\fin_chqreturn.html'
+    Left = 377
+    Top = 504
+  end
+  object fin_cancelchqpass: TPageProducer
+    HTMLFile = 'templates\fin_cancelchqpass.html'
+    Left = 457
+    Top = 504
+  end
+  object fin_cancelchqreturn: TPageProducer
+    HTMLFile = 'templates\fin_cancelchqreturn.html'
+    Left = 537
+    Top = 504
   end
 end
