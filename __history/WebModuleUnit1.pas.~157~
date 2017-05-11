@@ -114,8 +114,8 @@ type
     fin_chqpayin: TPageProducer;
     fin_chqpass: TPageProducer;
     fin_chqreturn: TPageProducer;
-    fin_cancelchqpass: TPageProducer;
-    fin_cancelchqreturn: TPageProducer;
+    fin_billfinance: TPageProducer;
+    fin_unknownmoney: TPageProducer;
     procedure DSServerClass1GetClass(DSServerClass: TDSServerClass; var PersistentClass: TPersistentClass);
     procedure ServerFunctionInvokerHTMLTag(Sender: TObject; Tag: TTag; const TagString: string; TagParams: TStrings; var ReplaceText: string);
     procedure WebModuleDefaultAction(Sender: TObject; Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
@@ -165,6 +165,12 @@ type
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure WebModule1saveChqstatAction(Sender: TObject; Request: TWebRequest;
       Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1saveChqpayinAction(Sender: TObject;
+      Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1saveChqpassAction(Sender: TObject; Request: TWebRequest;
+      Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1saveChqreturnAction(Sender: TObject;
+      Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
   private
     { Private declarations }
     XSchema: string;
@@ -2123,6 +2129,181 @@ begin
   end;
 end;
 
+procedure TWebModule1.WebModule1saveChqpassAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  ja, LJsonArr: TJSONArray;
+  jo, RqObjectMaster, RqObjectTran: TJSONObject;
+  table, value, Return, docno: string;
+  J : Integer;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Get Data CHQSTATTRAN
+    RqObjectMaster := LJsonArr.Items[0] as TJSONObject;
+    table := RqObjectMaster.GetValue('table').Value;
+    value := RqObjectMaster.GetValue('value').ToJSON;
+    docno := '';
+    if table = 'CHQSTAT' then
+    begin
+      ja := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+      for J := 0 to ja.Count - 1 do
+      begin
+        RqObjectTran := ja.Items[J] as TJSONObject;
+        if RqObjectTran.GetValue('CHQSTAT').Value = 'B' then
+        begin
+          with Query1 do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('UPDATE CHQSTAT SET CHQSTAT = :V1, BOOK = '''', FREE = 0, CHQSTATDT = null WHERE CHQNO = :V2 ');
+            Params.ParamByName('V1').AsString := RqObjectTran.GetValue('CHQSTAT').Value;
+            Params.ParamByName('V2').AsString := RqObjectTran.GetValue('CHQNO').Value;
+            ExecSQL;
+          end;
+        end
+        else
+        begin
+          with Query1 do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('UPDATE CHQSTAT SET CHQSTAT = :V1, BOOK = :V2, FREE = :V3, CHQSTATDT = :V4 WHERE CHQNO = :V5 ');
+            Params.ParamByName('V1').AsString   := RqObjectTran.GetValue('CHQSTAT').Value;
+            Params.ParamByName('V2').AsString   := RqObjectTran.GetValue('BOOK').Value;
+            Params.ParamByName('V3').AsFloat    := StrToFloat(RqObjectTran.GetValue('FREE').Value);
+            Params.ParamByName('V4').AsDateTime := StrToDate(RqObjectTran.GetValue('CHQSTATDT').Value);
+            Params.ParamByName('V5').AsString   := RqObjectTran.GetValue('CHQNO').Value;
+            ExecSQL;
+          end;
+        end;
+      end;
+    end;
+
+    Return := 'true';
+    //Response Data
+
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := '[{ "save": ' + Return + ', "rvchqno": "' + docno + '" }]';
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
+procedure TWebModule1.WebModule1saveChqpayinAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  ja, LJsonArr: TJSONArray;
+  jo, RqObjectMaster, RqObjectTran: TJSONObject;
+  table, value, Return, docno: string;
+  J : Integer;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Get Data CHQSTATTRAN
+    RqObjectMaster := LJsonArr.Items[0] as TJSONObject;
+    table := RqObjectMaster.GetValue('table').Value;
+    value := RqObjectMaster.GetValue('value').ToJSON;
+    docno := '';
+    if table = 'CHQSTAT' then
+    begin
+      ja := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+      for J := 0 to ja.Count - 1 do
+      begin
+        RqObjectTran := ja.Items[J] as TJSONObject;
+        with Query1 do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('UPDATE CHQSTAT SET CHQSTAT = :V1 WHERE CHQNO = :V2 ');
+          Params.ParamByName('V1').AsString := RqObjectTran.GetValue('CHQSTAT').Value;
+          Params.ParamByName('V2').AsString := RqObjectTran.GetValue('CHQNO').Value;
+          ExecSQL;
+        end;
+      end;
+    end;
+
+    Return := 'true';
+    //Response Data
+
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := '[{ "save": ' + Return + ', "rvchqno": "' + docno + '" }]';
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
+procedure TWebModule1.WebModule1saveChqreturnAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  ja, LJsonArr: TJSONArray;
+  jo, RqObjectMaster, RqObjectTran: TJSONObject;
+  table, value, Return, docno: string;
+  J : Integer;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Get Data CHQSTATTRAN
+    RqObjectMaster := LJsonArr.Items[0] as TJSONObject;
+    table := RqObjectMaster.GetValue('table').Value;
+    value := RqObjectMaster.GetValue('value').ToJSON;
+    docno := '';
+    if table = 'CHQSTAT' then
+    begin
+      ja := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+      for J := 0 to ja.Count - 1 do
+      begin
+        RqObjectTran := ja.Items[J] as TJSONObject;
+        if RqObjectTran.GetValue('CHQSTAT').Value = 'B' then
+        begin
+          with Query1 do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('UPDATE CHQSTAT SET CHQSTAT = :V1, CHQSTATDT = null WHERE CHQNO = :V2 ');
+            Params.ParamByName('V1').AsString := RqObjectTran.GetValue('CHQSTAT').Value;
+            Params.ParamByName('V2').AsString := RqObjectTran.GetValue('CHQNO').Value;
+            ExecSQL;
+          end;
+        end
+        else
+        begin
+          with Query1 do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('UPDATE CHQSTAT SET CHQSTAT = :V1, CHQSTATDT = :V2 WHERE CHQNO = :V3 ');
+            Params.ParamByName('V1').AsString   := RqObjectTran.GetValue('CHQSTAT').Value;
+            Params.ParamByName('V2').AsDateTime := StrToDate(RqObjectTran.GetValue('CHQSTATDT').Value);
+            Params.ParamByName('V3').AsString   := RqObjectTran.GetValue('CHQNO').Value;
+            ExecSQL;
+          end;
+        end;
+      end;
+    end;
+
+    Return := 'true';
+    //Response Data
+
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := '[{ "save": ' + Return + ', "rvchqno": "' + docno + '" }]';
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
 procedure TWebModule1.WebModule1saveChqstatAction(Sender: TObject;
   Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
 var
@@ -2368,6 +2549,8 @@ begin
       end;
       if QPost2.Active then
         QPost2.ApplyUpdates;
+      if QLastno.Active then
+        QLastno.ApplyUpdates;
       UniConnection1.Commit;
     except
       UniConnection1.Rollback;
@@ -2381,6 +2564,8 @@ begin
       QPost.CommitUpdates;
     if QPost2.Active then
       QPost2.CommitUpdates;
+    if QLastno.Active then
+      QLastno.CommitUpdates;
     Return := 'true';
       //Response Data
 

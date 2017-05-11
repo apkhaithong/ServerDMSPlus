@@ -537,6 +537,16 @@ object WebModule1: TWebModule1
       Name = 'fin_cancelchqreturn'
       PathInfo = '/fin_cancelchqreturn'
       Producer = fin_cancelchqreturn
+    end
+    item
+      Name = 'saveChqstat'
+      PathInfo = '/saveChqstat'
+      OnAction = WebModule1saveChqstatAction
+    end
+    item
+      Name = 'saveChqpayin'
+      PathInfo = '/saveChqpayin'
+      OnAction = WebModule1saveChqpayinAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 733

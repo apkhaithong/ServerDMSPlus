@@ -529,16 +529,6 @@ object WebModule1: TWebModule1
       Producer = fin_chqreturn
     end
     item
-      Name = 'fin_cancelchqpass'
-      PathInfo = '/fin_cancelchqpass'
-      Producer = fin_cancelchqpass
-    end
-    item
-      Name = 'fin_cancelchqreturn'
-      PathInfo = '/fin_cancelchqreturn'
-      Producer = fin_cancelchqreturn
-    end
-    item
       Name = 'saveChqstat'
       PathInfo = '/saveChqstat'
       OnAction = WebModule1saveChqstatAction
@@ -547,6 +537,41 @@ object WebModule1: TWebModule1
       Name = 'saveChqpayin'
       PathInfo = '/saveChqpayin'
       OnAction = WebModule1saveChqpayinAction
+    end
+    item
+      Name = 'saveChqpass'
+      PathInfo = '/saveChqpass'
+      OnAction = WebModule1saveChqpassAction
+    end
+    item
+      Name = 'saveChqreturn'
+      PathInfo = '/saveChqreturn'
+      OnAction = WebModule1saveChqreturnAction
+    end
+    item
+      Name = 'fin_billfinance'
+      PathInfo = '/fin_billfinance'
+      Producer = fin_billfinance
+    end
+    item
+      Name = 'fin_unknownmoney'
+      PathInfo = '/fin_unknownmoney'
+      Producer = fin_unknownmoney
+    end
+    item
+      Name = 'fin_billother'
+      PathInfo = '/fin_billother'
+      Producer = fin_billother
+    end
+    item
+      Name = 'savePaymenttranfer'
+      PathInfo = '/savePaymenttranfer'
+      OnAction = WebModule1savePaymenttranferAction
+    end
+    item
+      Name = 'saveChqanother'
+      PathInfo = '/saveChqanother'
+      OnAction = WebModule1saveChqanotherAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 733
@@ -1720,14 +1745,19 @@ object WebModule1: TWebModule1
     Left = 377
     Top = 504
   end
-  object fin_cancelchqpass: TPageProducer
-    HTMLFile = 'templates\fin_cancelchqpass.html'
+  object fin_billfinance: TPageProducer
+    HTMLFile = 'templates\fin_billfinance.html'
     Left = 457
     Top = 504
   end
-  object fin_cancelchqreturn: TPageProducer
-    HTMLFile = 'templates\fin_cancelchqreturn.html'
+  object fin_unknownmoney: TPageProducer
+    HTMLFile = 'templates\fin_unknownmoney.html'
     Left = 537
+    Top = 504
+  end
+  object fin_billother: TPageProducer
+    HTMLFile = 'templates\fin_billother.html'
+    Left = 625
     Top = 504
   end
 end
