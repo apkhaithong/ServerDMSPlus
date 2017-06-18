@@ -572,6 +572,61 @@ object WebModule1: TWebModule1
       Name = 'saveChqanother'
       PathInfo = '/saveChqanother'
       OnAction = WebModule1saveChqanotherAction
+    end
+    item
+      Name = 'saveOfficer'
+      PathInfo = '/saveOfficer'
+      OnAction = WebModule1saveOfficerAction
+    end
+    item
+      Name = 'saveVatmast'
+      PathInfo = '/saveVatmast'
+      OnAction = WebModule1saveVatmastAction
+    end
+    item
+      Name = 'getDbconfig'
+      PathInfo = '/getDbconfig'
+      OnAction = WebModule1getDbconfigAction
+    end
+    item
+      Name = 'saveDbconfig'
+      PathInfo = '/saveDbconfig'
+      OnAction = WebModule1saveDbconfigAction
+    end
+    item
+      Name = 'set_docconfig'
+      PathInfo = '/set_docconfig'
+      Producer = set_docconfig
+    end
+    item
+      Name = 'getDocconfig'
+      PathInfo = '/getDocconfig'
+      OnAction = WebModule1getDocconfigAction
+    end
+    item
+      Name = 'saveDocconfig'
+      PathInfo = '/saveDocconfig'
+      OnAction = WebModule1saveDocconfigAction
+    end
+    item
+      Name = 'saveAcard'
+      PathInfo = '/saveAcard'
+      OnAction = WebModule1saveAcardAction
+    end
+    item
+      Name = 'cancelAcard'
+      PathInfo = '/cancelAcard'
+      OnAction = WebModule1cancelAcardAction
+    end
+    item
+      Name = 'saveMathstrno'
+      PathInfo = '/saveMathstrno'
+      OnAction = WebModule1saveMathstrnoAction
+    end
+    item
+      Name = 'cancelMacthstrno'
+      PathInfo = '/cancelMacthstrno'
+      OnAction = WebModule1cancelMacthstrnoAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 733
