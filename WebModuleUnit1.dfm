@@ -627,6 +627,16 @@ object WebModule1: TWebModule1
       Name = 'cancelMacthstrno'
       PathInfo = '/cancelMacthstrno'
       OnAction = WebModule1cancelMacthstrnoAction
+    end
+    item
+      Name = 'saveArfinc'
+      PathInfo = '/saveArfinc'
+      OnAction = WebModule1saveArfincAction
+    end
+    item
+      Name = 'cancelArfinc'
+      PathInfo = '/cancelArfinc'
+      OnAction = WebModule1cancelArfincAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 733

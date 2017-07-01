@@ -190,6 +190,14 @@ type
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure WebModule1saveAcardAction(Sender: TObject; Request: TWebRequest;
       Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1cancelAcardAction(Sender: TObject; Request: TWebRequest;
+      Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1saveMathstrnoAction(Sender: TObject;
+      Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1cancelMacthstrnoAction(Sender: TObject;
+      Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1saveArfincAction(Sender: TObject; Request: TWebRequest;
+      Response: TWebResponse; var Handled: Boolean);
   private
     { Private declarations }
     XSchema: string;
@@ -939,6 +947,86 @@ begin
     Response.SendRedirect(Request.InternalScriptName + '/');
 end;
 
+procedure TWebModule1.WebModule1cancelAcardAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  ja, LJsonArr: TJSONArray;
+  jo, RqObjectMaster, RqObjectTran: TJSONObject;
+  userid, flag, table, key, value, Return, field, HF, LF, LV, S, docno: string;
+  I, J, K: integer;
+  DV, docdt: TdateTime;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Cancel ARCRED
+    RqObjectMaster := LJsonArr.Items[0] as TJSONObject;
+    table := RqObjectMaster.GetValue('table').Value;
+    field := RqObjectMaster.GetValue('field').Value;
+    key := RqObjectMaster.GetValue('key').Value;
+    userid := RqObjectMaster.GetValue('userid').Value;
+    flag := RqObjectMaster.GetValue('flag').Value;
+
+    with QPost do
+    begin
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT * FROM ' + table + ' WHERE ' + field + ' =:V1 ');
+      Params.ParamByName('V1').AsString := key;
+      Open;
+    end;
+
+    QPost.Edit;
+    QPost.FieldByName('FLAG').AsString := flag;
+    QPost.FieldByName('CANUSERID').AsString := userid;
+    QPost.FieldByName('CANDT').AsDateTime := now;
+    docno := QPost.FieldByName('ACARDNO').AsString;
+
+    with QPost2 do
+    begin
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT * FROM ACARDTRAN WHERE ACARDNO =:V1 ');
+      Params.ParamByName('V1').AsString := QPost.FieldByName('ACARDNO').AsString;
+      Open;
+    end;
+
+    QPost2.Edit;
+    QPost2.FieldByName('FLAG').AsString := flag;
+
+    //StartTransaction
+    UniConnection1.StartTransaction;
+    try
+      if QPost.Active then
+        QPost.ApplyUpdates;
+      if QPost2.Active then
+        QPost2.ApplyUpdates;
+      UniConnection1.Commit;
+    except
+      UniConnection1.Rollback;
+      Return := 'false';
+      //Response Data
+      Response.ContentType := 'application/json;charset=UTF-8';
+      Response.Content := Return;
+      raise;
+    end;
+    if QPost.Active then
+      QPost.CommitUpdates;
+    if QPost2.Active then
+      QPost2.CommitUpdates;
+    Return := 'true';
+      //Response Data
+
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := '[{ "cancel": ' + Return + ', "acardno": "' + docno + '" }]';
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
 procedure TWebModule1.WebModule1cancelArcredAction(Sender: TObject; Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
 var
   ja, LJsonArr: TJSONArray;
@@ -1178,6 +1266,70 @@ begin
 
     Response.ContentType := 'application/json;charset=UTF-8';
     Response.Content := '[{ "cancel": ' + Return + ', "contno": "' + docno + '" }]';
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
+procedure TWebModule1.WebModule1cancelMacthstrnoAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  ja, LJsonArr: TJSONArray;
+  jo, RqObjectMaster, RqObjectTran: TJSONObject;
+  userid, flag, table, key, value, Return, field, docno: string;
+  I, J, K: integer;
+  DV, docdt: TdateTime;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Cancel ARCRED
+    RqObjectMaster := LJsonArr.Items[0] as TJSONObject;
+    table  := RqObjectMaster.GetValue('table').Value;
+    field  := RqObjectMaster.GetValue('field').Value;
+    key    := RqObjectMaster.GetValue('key').Value;
+    userid := RqObjectMaster.GetValue('userid').Value;
+    flag   := RqObjectMaster.GetValue('flag').Value;
+
+    with QPost do
+    begin
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT * FROM ' + table + ' WHERE ' + field + ' =:V1 ');
+      Params.ParamByName('V1').AsString := key;
+      Open;
+    end;
+
+    QPost.Edit;
+    QPost.FieldByName('FLAG').AsString := flag;
+    QPost.FieldByName('CANUSER').AsString := userid;
+    QPost.FieldByName('CANDT').AsDateTime := now;
+    docno := QPost.FieldByName('IDNO').AsString;
+
+    //StartTransaction
+    UniConnection1.StartTransaction;
+    try
+      if QPost.Active then
+        QPost.ApplyUpdates;
+      UniConnection1.Commit;
+    except
+      UniConnection1.Rollback;
+      Return := 'false';
+      //Response Data
+      Response.ContentType := 'application/json;charset=UTF-8';
+      Response.Content := Return;
+      raise;
+    end;
+    if QPost.Active then
+      QPost.CommitUpdates;
+    Return := 'true';
+      //Response Data
+
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := '[{ "cancel": ' + Return + ', "idno": "' + docno + '" }]';
   end
   else
   begin
@@ -1586,15 +1738,15 @@ begin
         QPost.FieldByName('CC').AsFloat         := StrToFloat(RqObjectTran.GetValue('CC').Value);
         QPost.FieldByName('MANUYR').AsFloat     := StrToFloat(RqObjectTran.GetValue('MANUYR').Value);
         QPost.FieldByName('CC').AsFloat         := StrToFloat(RqObjectTran.GetValue('CC').Value);
-        QPost.FieldByName('PRICE').AsDateTime   := StrToDate(RqObjectTran.GetValue('PRICE').Value);
+        QPost.FieldByName('PRICE').AsFloat      := StrToFloat(RqObjectTran.GetValue('PRICE').Value);
         QPost.FieldByName('DISCT').AsFloat      := StrToFloat(RqObjectTran.GetValue('DISCT').Value);
         QPost.FieldByName('SALTYP').AsString    := RqObjectTran.GetValue('SALTYP').Value;
         QPost.FieldByName('DAWN').AsFloat       := StrToFloat(RqObjectTran.GetValue('DAWN').Value);
         QPost.FieldByName('KEYINUPAY').AsFloat  := StrToFloat(RqObjectTran.GetValue('KEYINUPAY').Value);
         QPost.FieldByName('T_NOPAY').AsFloat    := StrToFloat(RqObjectTran.GetValue('T_NOPAY').Value);
         QPost.FieldByName('REGNO').AsString     := RqObjectTran.GetValue('REGNO').Value;
-        QPost.FieldByName('INSURE3').AsFloat    := StrToFloat(RqObjectTran.GetValue('INSURE3').Value);
-        QPost.FieldByName('INSURE1').AsFloat    := StrToFloat(RqObjectTran.GetValue('INSURE1').Value);
+        QPost.FieldByName('INSURE3').AsString   := RqObjectTran.GetValue('INSURE3').Value;
+        QPost.FieldByName('INSURE1').AsString   := RqObjectTran.GetValue('INSURE1').Value;
         QPost.FieldByName('INSURE3PRC').AsFloat := StrToFloat(RqObjectTran.GetValue('INSURE3PRC').Value);
         QPost.FieldByName('INSURE1PRC').AsFloat := StrToFloat(RqObjectTran.GetValue('INSURE1PRC').Value);
         QPost.FieldByName('SUMQTY').AsFloat     := StrToFloat(RqObjectTran.GetValue('SUMQTY').Value);
@@ -1633,15 +1785,15 @@ begin
         QPost.FieldByName('CC').AsFloat         := StrToFloat(RqObjectTran.GetValue('CC').Value);
         QPost.FieldByName('MANUYR').AsFloat     := StrToFloat(RqObjectTran.GetValue('MANUYR').Value);
         QPost.FieldByName('CC').AsFloat         := StrToFloat(RqObjectTran.GetValue('CC').Value);
-        QPost.FieldByName('PRICE').AsDateTime   := StrToDate(RqObjectTran.GetValue('PRICE').Value);
+        QPost.FieldByName('PRICE').AsFloat      := StrToFloat(RqObjectTran.GetValue('PRICE').Value);
         QPost.FieldByName('DISCT').AsFloat      := StrToFloat(RqObjectTran.GetValue('DISCT').Value);
         QPost.FieldByName('SALTYP').AsString    := RqObjectTran.GetValue('SALTYP').Value;
         QPost.FieldByName('DAWN').AsFloat       := StrToFloat(RqObjectTran.GetValue('DAWN').Value);
         QPost.FieldByName('KEYINUPAY').AsFloat  := StrToFloat(RqObjectTran.GetValue('KEYINUPAY').Value);
         QPost.FieldByName('T_NOPAY').AsFloat    := StrToFloat(RqObjectTran.GetValue('T_NOPAY').Value);
         QPost.FieldByName('REGNO').AsString     := RqObjectTran.GetValue('REGNO').Value;
-        QPost.FieldByName('INSURE3').AsFloat    := StrToFloat(RqObjectTran.GetValue('INSURE3').Value);
-        QPost.FieldByName('INSURE1').AsFloat    := StrToFloat(RqObjectTran.GetValue('INSURE1').Value);
+        QPost.FieldByName('INSURE3').AsString   := RqObjectTran.GetValue('INSURE3').Value;
+        QPost.FieldByName('INSURE1').AsString   := RqObjectTran.GetValue('INSURE1').Value;
         QPost.FieldByName('INSURE3PRC').AsFloat := StrToFloat(RqObjectTran.GetValue('INSURE3PRC').Value);
         QPost.FieldByName('INSURE1PRC').AsFloat := StrToFloat(RqObjectTran.GetValue('INSURE1PRC').Value);
         QPost.FieldByName('SUMQTY').AsFloat     := StrToFloat(RqObjectTran.GetValue('SUMQTY').Value);
@@ -2203,6 +2355,307 @@ begin
 
     Response.ContentType := 'application/json;charset=UTF-8';
     Response.Content := '[{ "save": ' + Return + ', "contno": "' + docno + '" }]';
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
+procedure TWebModule1.WebModule1saveArfincAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  ja, LJsonArr: TJSONArray;
+  jo, RqObjectMaster, RqObjectTran: TJSONObject;
+  status, table, key, value, Return, locat, docno, apcode, LV, HF, LF: string;
+  I, J, K, ChqstatId: integer;
+  docdt, DV: TdateTime;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Get Data CHQSTAT
+    RqObjectMaster := LJsonArr.Items[0] as TJSONObject;
+    table := RqObjectMaster.GetValue('table').Value;
+    locat := RqObjectMaster.GetValue('locat').Value;
+    value := RqObjectMaster.GetValue('value').ToJSON;
+    status := RqObjectMaster.GetValue('status').Value;
+    key := RqObjectMaster.GetValue('key').Value;
+    if table = 'ARFINC' then
+    begin
+      ja := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+
+      if (status = 'insert') then
+      begin
+        with QPost do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM ARFINC WHERE IDNO IS NULL ');
+          Open;
+        end;
+        HF := 'H_FINCNO';
+        LF := 'L_FINCNO';
+        if not QDBConfig.Active then
+        begin
+          QDBConfig.ParamByName('LOCAT').AsString := locat;
+          QDbconfig.Open;
+        end;
+        RqObjectTran := ja.Items[0] as TJSONObject;
+        //Convert data to record
+        QPost.Append;
+        QPost.FieldByName('LOCAT').AsString   := RqObjectTran.GetValue('LOCAT').Value;
+        QPost.FieldByName('SDATE').AsDateTime := StrToDate(RqObjectTran.GetValue('SDATE').Value);
+        if QDBConfig.Fieldbyname('R_FINCNO').asstring = 'Y' then
+        begin
+          LV := locat;
+          DV := QPost.FieldByName('SDATE').AsDateTime;
+          QPost.FieldByName('CONTNO').AsString := RunNo(HF, LF, LV, DV);
+        end
+        else
+        begin
+          QPost.FieldByName('CONTNO').AsString := RqObjectTran.GetValue('CONTNO').Value;
+        end;
+        QPost.FieldByName('RESVNO').AsString   := RqObjectTran.GetValue('RESVNO').Value;
+        QPost.FieldByName('CUSCOD').AsString   := RqObjectTran.GetValue('CUSCOD').Value;
+        QPost.FieldByName('STRNO').AsString    := RqObjectTran.GetValue('STRNO').Value;
+        QPost.FieldByName('VATRT').AsFloat     := StrToFloat(RqObjectTran.GetValue('VATRT').Value);
+        QPost.FieldByName('ADDRNO').AsInteger  := StrToInt(RqObjectTran.GetValue('ADDRNO').Value);
+        QPost.FieldByName('LOCSALE').AsString  := RqObjectTran.GetValue('LOCSALE').Value;
+        QPost.FieldByName('FINCOD').AsString   := RqObjectTran.GetValue('FINCOD').Value;
+        QPost.FieldByName('STDPRC').AsFloat    := StrToFloat(RqObjectTran.GetValue('STDPRC').Value);
+        QPost.FieldByName('DISCT').AsFloat     := StrToFloat(RqObjectTran.GetValue('DISCT').Value);
+        QPost.FieldByName('KEYINPRC').AsFloat  := StrToFloat(RqObjectTran.GetValue('KEYINPRC').Value);
+        QPost.FieldByName('TKANG').AsFloat     := StrToFloat(RqObjectTran.GetValue('TKANG').Value);
+        QPost.FieldByName('COMFIN').AsFloat    := StrToFloat(RqObjectTran.GetValue('COMFIN').Value);
+        QPost.FieldByName('ISSUENO').AsString  := RqObjectTran.GetValue('ISSUENO').Value;
+        QPost.FieldByName('ISSUDT').AsDateTime := StrToDate(RqObjectTran.GetValue('ISSUDT').Value);
+        HF := 'H_TXFINC';
+        LF := 'L_TXFINC';
+        LV := locat;
+        DV := QPost.FieldByName('SDATE').AsDateTime;
+        QPost.FieldByName('TAXNO').AsString   := RunNo(HF, LF, LV, DV);
+        QPost.FieldByName('TAXDT').AsDateTime := QPost.FieldByName('SDATE').AsDateTime;
+        QPost.FieldByName('ACTICOD').AsString := RqObjectTran.GetValue('ACTICOD').Value;
+        QPost.FieldByName('PAYTYP').AsString  := RqObjectTran.GetValue('PAYTYP').Value;
+        QPost.FieldByName('T_NOPAY').AsFloat  := StrToFloat(RqObjectTran.GetValue('T_NOPAY').Value);
+        QPost.FieldByName('SALCOD').AsString  := RqObjectTran.GetValue('SALCOD').Value;
+        QPost.FieldByName('KEYINUPAY').AsFloat  := StrToFloat(RqObjectTran.GetValue('KEYINUPAY').Value);
+        QPost.FieldByName('FLAGTX').AsString  := RqObjectTran.GetValue('FLAGTX').Value;
+        QPost.FieldByName('FDATE').AsDateTime := StrToDate(RqObjectTran.GetValue('FDATE').Value);
+        QPost.FieldByName('TPYSALE').AsString     := RqObjectTran.GetValue('TPYSALE').Value;
+
+        QPost.FieldByName('CHQDT').AsDateTime   := StrToDate(RqObjectTran.GetValue('CHQDT').Value);
+        QPost.FieldByName('CHQDESC').AsString   := RqObjectTran.GetValue('CHQDESC').Value;
+        QPost.FieldByName('CHQBK').AsString     := RqObjectTran.GetValue('CHQBK').Value;
+        QPost.FieldByName('CHQAMT').AsFloat     := StrToFloat(RqObjectTran.GetValue('CHQAMT').Value);
+        QPost.FieldByName('CHQSTAT').AsString   := RqObjectTran.GetValue('CHQSTAT').Value;
+        QPost.FieldByName('RVCHQ').AsString     := RqObjectTran.GetValue('RVCHQ').Value;
+        QPost.FieldByName('INPUTDT').AsDateTime := Now;
+        QPost.FieldByName('USERID').AsString    := RqObjectTran.GetValue('USERID').Value;
+        docno     := QPost.FieldByName('RVCHQNO').AsString;
+        ChqstatId := 0;
+      end
+      else
+      begin
+        with QPost do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM CHQSTAT WHERE RVCHQNO =:V1 ');
+          Params.ParamByName('V1').AsString := key;
+          Open;
+        end;
+        RqObjectTran := ja.Items[0] as TJSONObject;
+        //Convert data to record
+        QPost.Edit;
+        QPost.FieldByName('LOCAT').AsString     := RqObjectTran.GetValue('LOCAT').Value;
+        QPost.FieldByName('RVCHQDT').AsDateTime := StrToDate(RqObjectTran.GetValue('RVCHQDT').Value);
+        QPost.FieldByName('CUSCOD').AsString    := RqObjectTran.GetValue('CUSCOD').Value;
+        QPost.FieldByName('CHQNO').AsString     := RqObjectTran.GetValue('CHQNO').Value;
+        QPost.FieldByName('CHQDT').AsDateTime   := StrToDate(RqObjectTran.GetValue('CHQDT').Value);
+        QPost.FieldByName('CHQDESC').AsString   := RqObjectTran.GetValue('CHQDESC').Value;
+        QPost.FieldByName('CHQBK').AsString     := RqObjectTran.GetValue('CHQBK').Value;
+        QPost.FieldByName('CHQAMT').AsFloat     := StrToFloat(RqObjectTran.GetValue('CHQAMT').Value);
+        QPost.FieldByName('CHQSTAT').AsString   := RqObjectTran.GetValue('CHQSTAT').Value;
+        QPost.FieldByName('RVCHQ').AsString     := RqObjectTran.GetValue('RVCHQ').Value;
+        docno     := QPost.FieldByName('RVCHQNO').AsString;
+        ChqstatId := QPost.FieldByName('IDNO').AsInteger
+      end;
+    end;
+    //Get Data CHQSTATTRAN
+    RqObjectMaster := LJsonArr.Items[1] as TJSONObject;
+    table := RqObjectMaster.GetValue('table').Value;
+    value := RqObjectMaster.GetValue('value').ToJSON;
+    if table = 'CHQSTATTRAN' then
+    begin
+      ja := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+      with QPost2 do
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Add('SELECT * FROM CHQSTATTRAN WHERE CHQSTATID =:V1 ');
+        Params.ParamValues['V1'] := ChqstatId;
+        Open;
+      end;
+      //Delete record in old data
+      QPost2.First;
+      while not QPost2.Eof do
+      begin
+        K := 0;
+        for J := 0 to ja.Count - 1 do
+        begin
+          RqObjectTran := ja.Items[J] as TJSONObject;
+          if StrToInt(RqObjectTran.GetValue('IDNO').Value) = QPost2.FieldByName('IDNO').AsInteger then
+          begin
+            K := K + 1;
+            break;
+          end;
+        end;
+        if K = 0 then
+          QPost2.Delete
+        else
+          QPost2.Next;
+      end;
+      //Edit old data and Insert new data
+      for I := 0 to ja.Count - 1 do
+      begin
+        RqObjectTran := ja.Items[I] as TJSONObject;
+        if QPost2.Locate('IDNO', RqObjectTran.GetValue('IDNO').Value, [loPartialKey]) then
+        begin
+          QPost2.Edit;
+        end
+        else
+        begin
+          QPost2.Append;
+        end;
+        QPost2.FieldByName('CHQSTATID').AsInteger := ChqstatId;
+        QPost2.FieldByName('CHQNO').AsString      := RqObjectTran.GetValue('CHQNO').Value;
+        QPost2.FieldByName('CHQDT').AsDateTime    := StrToDate(RqObjectTran.GetValue('CHQDT').Value);
+        QPost2.FieldByName('TSALE').AsString      := RqObjectTran.GetValue('TSALE').Value;
+        QPost2.FieldByName('CONTNO').AsString     := RqObjectTran.GetValue('CONTNO').Value;
+        if QPost2.FieldByName('TSALE').AsString = 'A' then
+        begin
+          with Query1 do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('SELECT IDNO FROM AR_INVOI WHERE CONTNO = :V1 ');
+            Params.ParamByName('V1').AsString := QPost2.FieldByName('CONTNO').AsString ;
+            Open;
+          end;
+          QPost2.FieldByName('CONTID').AsInteger := Query1.FieldByName('IDNO').AsInteger;
+        end
+        else if QPost2.FieldByName('TSALE').AsString = 'C' then
+        begin
+          with Query1 do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('SELECT IDNO FROM ARCRED WHERE CONTNO = :V1 ');
+            Params.ParamByName('V1').AsString := QPost2.FieldByName('CONTNO').AsString ;
+            Open;
+          end;
+          QPost2.FieldByName('CONTID').AsInteger := Query1.FieldByName('IDNO').AsInteger;
+        end
+        else if QPost2.FieldByName('TSALE').AsString = 'F' then
+        begin
+          with Query1 do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('SELECT IDNO FROM ARFINC WHERE CONTNO = :V1 ');
+            Params.ParamByName('V1').AsString := QPost2.FieldByName('CONTNO').AsString ;
+            Open;
+          end;
+          QPost2.FieldByName('CONTID').AsInteger := Query1.FieldByName('IDNO').AsInteger;
+        end
+        else if QPost2.FieldByName('TSALE').AsString = 'R' then
+        begin
+          with Query1 do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('SELECT IDNO FROM ARRESV WHERE RESVNO = :V1 ');
+            Params.ParamByName('V1').AsString := QPost2.FieldByName('CONTNO').AsString ;
+            Open;
+          end;
+          QPost2.FieldByName('CONTID').AsInteger := Query1.FieldByName('IDNO').AsInteger;
+        end
+        else if QPost2.FieldByName('TSALE').AsString = 'T' then
+        begin
+          with Query1 do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('SELECT IDNO FROM CUSTMAST WHERE CUSCOD = :V1 ');
+            Params.ParamByName('V1').AsString := QPost2.FieldByName('CONTNO').AsString ;
+            Open;
+          end;
+          QPost2.FieldByName('CONTID').AsInteger := Query1.FieldByName('IDNO').AsInteger;
+        end
+        else if QPost2.FieldByName('TSALE').AsString = 'X' then
+        begin
+          with Query1 do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('SELECT IDNO FROM AROTHSALE WHERE ARCONT = :V1 ');
+            Params.ParamByName('V1').AsString := QPost2.FieldByName('CONTNO').AsString ;
+            Open;
+          end;
+          QPost2.FieldByName('CONTID').AsInteger := Query1.FieldByName('IDNO').AsInteger;
+        end;
+        QPost2.FieldByName('CHQPAYAMT').AsFloat := StrToFloat(RqObjectTran.GetValue('CHQPAYAMT').Value);
+      end;
+    end;
+
+    //StartTransaction
+    UniConnection1.StartTransaction;
+    try
+      if QPost.Active then
+        QPost.ApplyUpdates;
+      with Query1 do
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Add('SELECT * FROM CHQSTAT WHERE RVCHQNO =:V1 ');
+        Params.ParamByName('V1').AsString := docno;
+        Open;
+      end;
+      ChqstatId := Query1.FieldByName('IDNO').AsInteger;
+      QPost2.First;
+      while not QPost2.Eof  do
+      begin
+        QPost2.Edit;
+        QPost2.FieldByName('CHQSTATID').AsInteger := ChqstatId;
+        QPost2.Next;
+      end;
+      if QPost2.Active then
+        QPost2.ApplyUpdates;
+      if QLastno.Active then
+        QLastno.ApplyUpdates;
+      UniConnection1.Commit;
+    except
+      UniConnection1.Rollback;
+      Return := 'false';
+      //Response Data
+      Response.ContentType := 'application/json;charset=UTF-8';
+      Response.Content := Return;
+      raise;
+    end;
+    if QPost.Active then
+      QPost.CommitUpdates;
+    if QPost2.Active then
+      QPost2.CommitUpdates;
+    if QLastno.Active then
+      QLastno.CommitUpdates;
+    Return := 'true';
+      //Response Data
+
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := '[{ "save": ' + Return + ', "rvchqno": "' + docno + '" }]';
   end
   else
   begin
@@ -4339,6 +4792,112 @@ begin
 
     Response.ContentType := 'application/json;charset=UTF-8';
     Response.Content := '[{ "save": ' + Return + ', "refnoin": "' + docno + '" }]';
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
+procedure TWebModule1.WebModule1saveMathstrnoAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  ja, LJsonArr: TJSONArray;
+  jo, RqObjectMaster, RqObjectTran: TJSONObject;
+  status, table, key, value, Return, locat, HF, LF, LV, S, docno, strno: string;
+  I, J, K: integer;
+  DV, docdt: TdateTime;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Get Data ARCRED
+    RqObjectMaster := LJsonArr.Items[0] as TJSONObject;
+    table  := RqObjectMaster.GetValue('table').Value;
+    locat  := RqObjectMaster.GetValue('locat').Value;
+    value  := RqObjectMaster.GetValue('value').ToJSON;
+    status := RqObjectMaster.GetValue('status').Value;
+    key    := RqObjectMaster.GetValue('key').Value;
+    if table = 'MATCHSTRNO' then
+    begin
+      ja := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+      if (status = 'insert') then
+      begin
+        with QPost do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM MATCHSTRNO WHERE IDNO IS NULL ');
+          Open;
+        end;
+        RqObjectTran := ja.Items[0] as TJSONObject;
+        //Convert data to record
+        QPost.Append;
+        QPost.FieldByName('MATCHDT').AsDateTime := StrToDate(RqObjectTran.GetValue('MATCHDT').Value);
+        QPost.FieldByName('RESVNO').AsString    := RqObjectTran.GetValue('RESVNO').Value;
+        QPost.FieldByName('LOCAT').AsString     := RqObjectTran.GetValue('LOCAT').Value;
+        QPost.FieldByName('STRNO').AsString     := RqObjectTran.GetValue('STRNO').Value;
+        QPost.FieldByName('FLAG').AsString      := RqObjectTran.GetValue('FLAG').Value;
+        QPost.FieldByName('USERID').AsString    := RqObjectTran.GetValue('USERID').Value;
+        QPost.FieldByName('INPUTDT').AsDateTime := Now;
+        docno := QPost.FieldByName('RESVNO').AsString;
+        strno := QPost.FieldByName('STRNO').AsString;
+      end
+      else
+      begin
+        with QPost do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM MATCHSTRNO WHERE IDNO =:V1 ');
+          Params.ParamByName('V1').AsInteger := StrToInt(key);
+          Open;
+        end;
+        RqObjectTran := ja.Items[0] as TJSONObject;
+        //Convert data to record
+        QPost.Edit;
+        QPost.FieldByName('MATCHDT').AsDateTime := StrToDate(RqObjectTran.GetValue('MATCHDT').Value);
+        QPost.FieldByName('RESVNO').AsString    := RqObjectTran.GetValue('RESVNO').Value;
+        QPost.FieldByName('LOCAT').AsString     := RqObjectTran.GetValue('LOCAT').Value;
+        QPost.FieldByName('STRNO').AsString     := RqObjectTran.GetValue('STRNO').Value;
+        QPost.FieldByName('FLAG').AsString      := RqObjectTran.GetValue('FLAG').Value;
+        docno := QPost.FieldByName('RESVNO').AsString;
+        strno := QPost.FieldByName('STRNO').AsString;
+      end;
+    end;
+
+    //StartTransaction
+    UniConnection1.StartTransaction;
+    try
+      if QPost.Active then
+        QPost.ApplyUpdates;
+      UniConnection1.Commit;
+    except
+      UniConnection1.Rollback;
+      Return := 'false';
+      //Response Data
+      Response.ContentType := 'application/json;charset=UTF-8';
+      Response.Content := Return;
+      raise;
+    end;
+    if QPost.Active then
+      QPost.CommitUpdates;
+
+    with Query1 do
+    begin
+      Close;
+      SQL.Clear;
+      SQL.Add('SELECT * FROM MATCHSTRNO WHERE RESVNO = :V1 AND STRNO = :V2 ');
+      Params.ParamByName('V1').AsString := docno;
+      Params.ParamByName('V2').AsString := strno;
+      Open;
+    end;
+    Return := 'true';
+      //Response Data
+
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := '[{ "save": ' + Return + ', "idno": "' + Query1.FieldByName('IDNO').AsString + '" }]';
   end
   else
   begin
