@@ -637,6 +637,21 @@ object WebModule1: TWebModule1
       Name = 'cancelArfinc'
       PathInfo = '/cancelArfinc'
       OnAction = WebModule1cancelArfincAction
+    end
+    item
+      Name = 'sale_ar_invoi'
+      PathInfo = '/sale_ar_invoi'
+      Producer = sale_ar_invoi
+    end
+    item
+      Name = 'saveAr_invoi'
+      PathInfo = '/saveAr_invoi'
+      OnAction = WebModule1saveAr_invoiAction
+    end
+    item
+      Name = 'cancelAr_invoi'
+      PathInfo = '/cancelAr_invoi'
+      OnAction = WebModule1cancelAr_invoiAction
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 733
@@ -1602,7 +1617,7 @@ object WebModule1: TWebModule1
     CachedUpdates = True
     Options.RequiredFields = False
     Left = 577
-    Top = 128
+    Top = 132
   end
   object QLastno: TUniQuery
     Connection = UniConnection1
