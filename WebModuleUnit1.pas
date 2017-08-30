@@ -117,6 +117,24 @@ type
     fin_billfinance: TPageProducer;
     fin_unknownmoney: TPageProducer;
     fin_billother: TPageProducer;
+    ar_arothsale: TPageProducer;
+    tax_debitnotecar: TPageProducer;
+    tax_debitnoteoth: TPageProducer;
+    tax_creaditnotebuy1: TPageProducer;
+    tax_creaditnotebuy2: TPageProducer;
+    tax_creditnotesalefin1: TPageProducer;
+    tax_creditnotesalefin2: TPageProducer;
+    tax_creditnotesalecsh1: TPageProducer;
+    tax_creditnotesalecsh2: TPageProducer;
+    tax_creditnotesaleagen: TPageProducer;
+    tax_creditnotesaleoth: TPageProducer;
+    tax_edittaxsale: TPageProducer;
+    admin_setuserid: TPageProducer;
+    admin_changepassword: TPageProducer;
+    admin_userauthorized: TPageProducer;
+    admin_userlog: TPageProducer;
+    admin_copyuser: TPageProducer;
+    Query2: TUniQuery;
     procedure DSServerClass1GetClass(DSServerClass: TDSServerClass; var PersistentClass: TPersistentClass);
     procedure ServerFunctionInvokerHTMLTag(Sender: TObject; Tag: TTag; const TagString: string; TagParams: TStrings; var ReplaceText: string);
     procedure WebModuleDefaultAction(Sender: TObject; Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
@@ -203,6 +221,14 @@ type
     procedure WebModule1saveAr_invoiAction(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure WebModule1cancelAr_invoiAction(Sender: TObject;
+      Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1savePasswrdAction(Sender: TObject; Request: TWebRequest;
+      Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1saveChqpasswordAction(Sender: TObject;
+      Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1saveUserauthorizeAction(Sender: TObject;
+      Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1saveCopyuserAction(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
   private
     { Private declarations }
@@ -3635,6 +3661,101 @@ begin
   end;
 end;
 
+procedure TWebModule1.WebModule1saveChqpasswordAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  ja, LJsonArr: TJSONArray;
+  jo, RqObjectMaster, RqObjectTran: TJSONObject;
+  status, table, key, value, Return, locat, HF, LF, LV, S, docno: string;
+  I, J, K: integer;
+  DV, docdt: TdateTime;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Get Data OFFICER
+    RqObjectMaster := LJsonArr.Items[0] as TJSONObject;
+    table := RqObjectMaster.GetValue('table').Value;
+    value := RqObjectMaster.GetValue('value').ToJSON;
+    status := RqObjectMaster.GetValue('status').Value;
+    key := RqObjectMaster.GetValue('key').Value;
+    if table = 'PASSWRD' then
+    begin
+      ja := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+      if (status = 'insert') then
+      begin
+        with QPost do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM PASSWRD WHERE USERID = :V1 ');
+          Params.ParamByName('V1').AsString := key;
+          Open;
+        end;
+        RqObjectTran := ja.Items[0] as TJSONObject;
+        with Query1 do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT ENDCODEPASS('''+RqObjectTran.GetValue('USERID').Value+''', '''+RqObjectTran.GetValue('OLDPASSWD').Value+''') AS ENDCODE FROM SYSIBM.SYSDUMMY1');
+          Open;
+        end;
+        //Convert data to record
+        if QPost.FieldByName('ENDCODE').AsString = Query1.FieldByName('ENDCODE').AsString then
+        begin
+          with Query1 do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('SELECT ENDCODEPASS('''+RqObjectTran.GetValue('USERID').Value+''', '''+RqObjectTran.GetValue('NEWPASSWORD').Value+''') AS ENDCODE FROM SYSIBM.SYSDUMMY1');
+            Open;
+          end;
+          docno := 'true';
+          QPost.Edit;
+          QPost.FieldByName('ENDCODE').AsString   := Query1.FieldByName('ENDCODE').AsString;
+          QPost.FieldByName('UPDATE1').AsDateTime := Now;
+        end
+        else
+        begin
+          docno := 'false';
+        end;
+      end;
+    end;
+    if docno = 'true' then
+    begin
+      //StartTransaction
+      UniConnection1.StartTransaction;
+      try
+        if QPost.Active then
+          QPost.ApplyUpdates;
+        UniConnection1.Commit;
+      except
+        UniConnection1.Rollback;
+        Return := 'false';
+        //Response Data
+        Response.ContentType := 'application/json;charset=UTF-8';
+        Response.Content := Return;
+        raise;
+      end;
+      if QPost.Active then
+        QPost.CommitUpdates;
+      Return := 'true';
+    end
+    else
+    begin
+      Return := 'false';
+    end;
+    //Response Data
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := '[{ "save": ' + Return + ', "userid": "' + key + '" }]';
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
 procedure TWebModule1.WebModule1saveChqpayinAction(Sender: TObject;
   Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
 var
@@ -4168,6 +4289,67 @@ begin
 
     Response.ContentType := 'application/json;charset=UTF-8';
     Response.Content := '[{ "save": ' + Return + ', "contno": "' + docno + '" }]';
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
+procedure TWebModule1.WebModule1saveCopyuserAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  ja, LJsonArr: TJSONArray;
+  jo, RqObjectMaster, RqObjectTran: TJSONObject;
+  status, table, key, value, Return, locat, HF, LF, LV, S, docno: string;
+  I, J, K: integer;
+  DV, docdt: TdateTime;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Get Data OFFICER
+    RqObjectMaster := LJsonArr.Items[0] as TJSONObject;
+    table  := RqObjectMaster.GetValue('table').Value;
+    value  := RqObjectMaster.GetValue('value').ToJSON;
+    status := RqObjectMaster.GetValue('status').Value;
+    key    := RqObjectMaster.GetValue('key').Value;
+    if table = 'USERMENU' then
+    begin
+      ja := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+      RqObjectTran := ja.Items[0] as TJSONObject;
+      with Query1 do
+      begin
+        Close;
+        SQL.Clear;
+        SQL.Add('SELECT * FROM USERMENU WHERE USERID = :SUSERID ORDER BY MENUCODE');
+        Params.ParamByName('SUSERID').AsString := RqObjectTran.GetValue('USERID').Value;
+        Open;
+      end;
+      Query1.First;
+      while not Query1.Eof do
+      begin
+        with Query2 do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('UPDATE USERMENU SET M_ACCESS = :SM_ACCESS, M_EDIT = :SM_EDIT, M_INSERT = :SM_INSERT, M_DELETE = :SM_DELETE WHERE USERID = :SUSERID AND MENUCODE = :SMENUCODE ');
+          Params.ParamByName('SM_ACCESS').AsString := Query1.FieldByName('M_ACCESS').AsString;
+          Params.ParamByName('SM_INSERT').AsString := Query1.FieldByName('M_INSERT').AsString;
+          Params.ParamByName('SM_EDIT').AsString   := Query1.FieldByName('M_EDIT').AsString;
+          Params.ParamByName('SM_DELETE').AsString := Query1.FieldByName('M_DELETE').AsString;
+          Params.ParamByName('SUSERID').AsString   := RqObjectTran.GetValue('TOUSERID').Value;
+          Params.ParamByName('SMENUCODE').AsString := Query1.FieldByName('MENUCODE').AsString;
+          ExecSQL;
+        end;
+        Query1.Next;
+      end;
+    end;
+    Return := 'true';
+    //Response Data
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := '[{ "save": ' + Return + ', "userid": "' + key + '" }]';
   end
   else
   begin
@@ -6038,6 +6220,123 @@ begin
   end;
 end;
 
+procedure TWebModule1.WebModule1savePasswrdAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  ja, LJsonArr: TJSONArray;
+  jo, RqObjectMaster, RqObjectTran: TJSONObject;
+  status, table, key, value, Return, locat, HF, LF, LV, S, docno: string;
+  I, J, K: integer;
+  DV, docdt: TdateTime;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Get Data OFFICER
+    RqObjectMaster := LJsonArr.Items[0] as TJSONObject;
+    table := RqObjectMaster.GetValue('table').Value;
+    value := RqObjectMaster.GetValue('value').ToJSON;
+    status := RqObjectMaster.GetValue('status').Value;
+    key := RqObjectMaster.GetValue('key').Value;
+    if table = 'PASSWRD' then
+    begin
+      ja := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+      if (status = 'insert') then
+      begin
+        with QPost do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM PASSWRD WHERE USERID IS NULL ');
+          Open;
+        end;
+        RqObjectTran := ja.Items[0] as TJSONObject;
+        //Convert data to record
+        QPost.Append;
+        QPost.FieldByName('USERID').AsString   := RqObjectTran.GetValue('USERID').Value;
+        QPost.FieldByName('PASSWD').AsString   := '@@@@@@@@';
+        QPost.FieldByName('CUSCOD').AsString   := RqObjectTran.GetValue('CUSCOD').Value;
+        QPost.FieldByName('LOCATCD').AsString  := RqObjectTran.GetValue('LOCATCD').Value;
+        QPost.FieldByName('LEVEL').AsString    := RqObjectTran.GetValue('LEVEL').Value;
+        QPost.FieldByName('BLOCK').AsString    := RqObjectTran.GetValue('BLOCK').Value;
+        QPost.FieldByName('SRHACTV').AsString  := RqObjectTran.GetValue('SRHACTV').Value;
+        QPost.FieldByName('KEYDISC').AsString  := RqObjectTran.GetValue('KEYDISC').Value;
+        QPost.FieldByName('EDITCUST').AsString := RqObjectTran.GetValue('EDITCUST').Value;
+        with Query1 do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT ENDCODEPASS('''+RqObjectTran.GetValue('USERID').Value+''', '''+RqObjectTran.GetValue('PASSWD').Value+''') AS ENDCODE FROM SYSIBM.SYSDUMMY1');
+          Open;
+        end;
+        QPost.FieldByName('ENDCODE').AsString   := Query1.FieldByName('ENDCODE').AsString;
+        QPost.FieldByName('UPDATE1').AsDateTime := Now;
+      end
+      else
+      begin
+        with QPost do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('SELECT * FROM PASSWRD WHERE USERID = :V1 ');
+          Params.ParamByName('V1').AsString := key;
+          Open;
+        end;
+        RqObjectTran := ja.Items[0] as TJSONObject;
+        //Convert data to record
+        QPost.Edit;
+        QPost.FieldByName('PASSWD').AsString   := '@@@@@@@@';
+        QPost.FieldByName('CUSCOD').AsString   := RqObjectTran.GetValue('CUSCOD').Value;
+        QPost.FieldByName('LOCATCD').AsString  := RqObjectTran.GetValue('LOCATCD').Value;
+        QPost.FieldByName('LEVEL').AsString    := RqObjectTran.GetValue('LEVEL').Value;
+        QPost.FieldByName('BLOCK').AsString    := RqObjectTran.GetValue('BLOCK').Value;
+        QPost.FieldByName('SRHACTV').AsString  := RqObjectTran.GetValue('SRHACTV').Value;
+        QPost.FieldByName('KEYDISC').AsString  := RqObjectTran.GetValue('KEYDISC').Value;
+        QPost.FieldByName('EDITCUST').AsString := RqObjectTran.GetValue('EDITCUST').Value;
+        if (RqObjectTran.GetValue('PASSWD').Value <> '@@@@@@@@') then
+        begin
+          with Query1 do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Add('SELECT ENDCODEPASS('''+RqObjectTran.GetValue('USERID').Value+''', '''+RqObjectTran.GetValue('PASSWD').Value+''') AS ENDCODE FROM SYSIBM.SYSDUMMY1');
+            Open;
+          end;
+          QPost.FieldByName('ENDCODE').AsString   := Query1.FieldByName('ENDCODE').AsString;
+        end;
+        QPost.FieldByName('UPDATE1').AsDateTime := Now;
+      end;
+    end;
+
+    //StartTransaction
+    UniConnection1.StartTransaction;
+    try
+      if QPost.Active then
+        QPost.ApplyUpdates;
+      UniConnection1.Commit;
+    except
+      UniConnection1.Rollback;
+      Return := 'false';
+      //Response Data
+      Response.ContentType := 'application/json;charset=UTF-8';
+      Response.Content := Return;
+      raise;
+    end;
+    if QPost.Active then
+      QPost.CommitUpdates;
+    Return := 'true';
+      //Response Data
+
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := '[{ "save": ' + Return + ', "userid": "' + key + '" }]';
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
 procedure TWebModule1.WebModule1savePaymenttranferAction(Sender: TObject;
   Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
 var
@@ -6162,6 +6461,58 @@ begin
 
     Response.ContentType := 'application/json;charset=UTF-8';
     Response.Content := '[{ "save": ' + Return + ', "chqno": "' + docno + '" }]';
+  end
+  else
+  begin
+    Response.Content := Page404.Content;
+  end;
+end;
+
+procedure TWebModule1.WebModule1saveUserauthorizeAction(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  ja, LJsonArr: TJSONArray;
+  jo, RqObjectMaster, RqObjectTran: TJSONObject;
+  status, table, key, value, Return, locat, HF, LF, LV, S, docno: string;
+  I, J, K: integer;
+  DV, docdt: TdateTime;
+begin
+  Handled := True;
+  if Request.MethodType = mtPost then
+  begin
+    LJsonArr := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(Request.Content), 0) as TJSONArray;
+    //Get Data OFFICER
+    RqObjectMaster := LJsonArr.Items[0] as TJSONObject;
+    table  := RqObjectMaster.GetValue('table').Value;
+    value  := RqObjectMaster.GetValue('value').ToJSON;
+    status := RqObjectMaster.GetValue('status').Value;
+    key    := RqObjectMaster.GetValue('key').Value;
+    if table = 'USERMENU' then
+    begin
+      ja := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(value), 0) as TJSONArray;
+      //Edit data
+      for I := 0 to ja.Count - 1 do
+      begin
+        RqObjectTran := ja.Items[I] as TJSONObject;
+        with Query1 do
+        begin
+          Close;
+          SQL.Clear;
+          SQL.Add('UPDATE USERMENU SET M_ACCESS = :SM_ACCESS, M_EDIT = :SM_EDIT, M_INSERT = :SM_INSERT, M_DELETE = :SM_DELETE WHERE USERID = :SUSERID AND MENUCODE = :SMENUCODE ');
+          Params.ParamByName('SM_ACCESS').AsString := RqObjectTran.GetValue('M_ACCESS').Value;
+          Params.ParamByName('SM_INSERT').AsString := RqObjectTran.GetValue('M_INSERT').Value;
+          Params.ParamByName('SM_EDIT').AsString   := RqObjectTran.GetValue('M_EDIT').Value;
+          Params.ParamByName('SM_DELETE').AsString := RqObjectTran.GetValue('M_DELETE').Value;
+          Params.ParamByName('SUSERID').AsString   := RqObjectTran.GetValue('USERID').Value;
+          Params.ParamByName('SMENUCODE').AsString := RqObjectTran.GetValue('MENUCODE').Value;
+          ExecSQL;
+        end;
+      end;
+    end;
+    Return := 'true';
+    //Response Data
+    Response.ContentType := 'application/json;charset=UTF-8';
+    Response.Content := '[{ "save": ' + Return + ', "userid": "' + key + '" }]';
   end
   else
   begin

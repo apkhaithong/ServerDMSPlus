@@ -637,9 +637,124 @@ object WebModule1: TWebModule1
       Name = 'cancelArfinc'
       PathInfo = '/cancelArfinc'
       OnAction = WebModule1cancelArfincAction
+    end
+    item
+      Name = 'sale_ar_invoi'
+      PathInfo = '/sale_ar_invoi'
+      Producer = sale_ar_invoi
+    end
+    item
+      Name = 'saveAr_invoi'
+      PathInfo = '/saveAr_invoi'
+      OnAction = WebModule1saveAr_invoiAction
+    end
+    item
+      Name = 'cancelAr_invoi'
+      PathInfo = '/cancelAr_invoi'
+      OnAction = WebModule1cancelAr_invoiAction
+    end
+    item
+      Name = 'ar_arothsale'
+      PathInfo = '/ar_arothsale'
+      Producer = ar_arothsale
+    end
+    item
+      Name = 'tax_debitnotecar'
+      PathInfo = '/tax_debitnotecar'
+      Producer = tax_debitnotecar
+    end
+    item
+      Name = 'tax_debitnoteoth'
+      PathInfo = '/tax_debitnoteoth'
+      Producer = tax_debitnoteoth
+    end
+    item
+      Name = 'tax_creaditnotebuy1'
+      PathInfo = '/tax_creaditnotebuy1'
+      Producer = tax_creaditnotebuy1
+    end
+    item
+      Name = 'tax_creaditnotebuy2'
+      PathInfo = '/tax_creaditnotebuy2'
+      Producer = tax_creaditnotebuy2
+    end
+    item
+      Name = 'tax_creditnotesalefin1'
+      PathInfo = '/tax_creditnotesalefin1'
+      Producer = tax_creditnotesalefin1
+    end
+    item
+      Name = 'tax_creditnotesalefin2'
+      PathInfo = '/tax_creditnotesalefin2'
+      Producer = tax_creditnotesalefin2
+    end
+    item
+      Name = 'tax_creditnotesalecsh1'
+      PathInfo = '/tax_creditnotesalecsh1'
+      Producer = tax_creditnotesalecsh1
+    end
+    item
+      Name = 'tax_creditnotesalecsh2'
+      PathInfo = '/tax_creditnotesalecsh2'
+      Producer = tax_creditnotesalecsh2
+    end
+    item
+      Name = 'tax_creditnotesaleagen'
+      PathInfo = '/tax_creditnotesaleagen'
+      Producer = tax_creditnotesaleagen
+    end
+    item
+      Name = 'tax_creditnotesaleoth'
+      PathInfo = '/tax_creditnotesaleoth'
+      Producer = tax_creditnotesaleoth
+    end
+    item
+      Name = 'tax_edittaxsale'
+      PathInfo = '/tax_edittaxsale'
+      Producer = tax_edittaxsale
+    end
+    item
+      Name = 'admin_setuserid'
+      PathInfo = '/admin_setuserid'
+      Producer = admin_setuserid
+    end
+    item
+      Name = 'admin_changepassword'
+      PathInfo = '/admin_changepassword'
+      Producer = admin_changepassword
+    end
+    item
+      Name = 'admin_userauthorized'
+      PathInfo = '/admin_userauthorized'
+      Producer = admin_userauthorized
+    end
+    item
+      Name = 'admin_userlog'
+      PathInfo = '/admin_userlog'
+      Producer = admin_userlog
+    end
+    item
+      Name = 'savePasswrd'
+      PathInfo = '/savePasswrd'
+      OnAction = WebModule1savePasswrdAction
+    end
+    item
+      Name = 'saveChqpassword'
+      PathInfo = '/saveChqpassword'
+      OnAction = WebModule1saveChqpasswordAction
+    end
+    item
+      Name = 'saveUserauthorize'
+      PathInfo = '/saveUserauthorize'
+      OnAction = WebModule1saveUserauthorizeAction
+    end
+    item
+      Name = 'admin_copyuser'
+      PathInfo = '/admin_copyuser'
+      Producer = admin_copyuser
     end>
   BeforeDispatch = WebModuleBeforeDispatch
-  Height = 733
+  Height = 773
   Width = 1142
   object DSServer1: TDSServer
     Left = 49
@@ -1395,8 +1510,8 @@ object WebModule1: TWebModule1
   end
   object rp_receiptdaily: TPageProducer
     HTMLFile = 'templates\rp_receiptdaily.html'
-    Left = 33
-    Top = 656
+    Left = 37
+    Top = 716
   end
   object login: TPageProducer
     HTMLFile = 'templates\login.html'
@@ -1602,7 +1717,7 @@ object WebModule1: TWebModule1
     CachedUpdates = True
     Options.RequiredFields = False
     Left = 577
-    Top = 128
+    Top = 132
   end
   object QLastno: TUniQuery
     Connection = UniConnection1
@@ -1824,5 +1939,90 @@ object WebModule1: TWebModule1
     HTMLFile = 'templates\fin_billother.html'
     Left = 625
     Top = 504
+  end
+  object ar_arothsale: TPageProducer
+    HTMLFile = 'templates\ar_arothsale.html'
+    Left = 49
+    Top = 568
+  end
+  object tax_debitnotecar: TPageProducer
+    HTMLFile = 'templates\tax_debitnotecar.html'
+    Left = 133
+    Top = 568
+  end
+  object tax_debitnoteoth: TPageProducer
+    HTMLFile = 'templates\tax_debitnoteoth.html'
+    Left = 229
+    Top = 564
+  end
+  object tax_creaditnotebuy1: TPageProducer
+    HTMLFile = 'templates\tax_creaditnotebuy1.html'
+    Left = 337
+    Top = 568
+  end
+  object tax_creaditnotebuy2: TPageProducer
+    HTMLFile = 'templates\tax_creaditnotebuy2.html'
+    Left = 449
+    Top = 568
+  end
+  object tax_creditnotesalefin1: TPageProducer
+    HTMLFile = 'templates\tax_creditnotesalefin1.html'
+    Left = 565
+    Top = 568
+  end
+  object tax_creditnotesalefin2: TPageProducer
+    HTMLFile = 'templates\tax_creditnotesalefin2.html'
+    Left = 681
+    Top = 568
+  end
+  object tax_creditnotesalecsh1: TPageProducer
+    HTMLFile = 'templates\tax_creditnotesalecsh1.html'
+    Left = 797
+    Top = 568
+  end
+  object tax_creditnotesalecsh2: TPageProducer
+    HTMLFile = 'templates\tax_creditnotesalecsh2.html'
+    Left = 913
+    Top = 568
+  end
+  object tax_creditnotesaleagen: TPageProducer
+    HTMLFile = 'templates\tax_creditnotesaleagen.html'
+    Left = 45
+    Top = 628
+  end
+  object tax_creditnotesaleoth: TPageProducer
+    HTMLFile = 'templates\tax_creditnotesaleoth.html'
+    Left = 165
+    Top = 628
+  end
+  object tax_edittaxsale: TPageProducer
+    HTMLFile = 'templates\tax_edittaxsale.html'
+    Left = 273
+    Top = 628
+  end
+  object admin_setuserid: TPageProducer
+    HTMLFile = 'templates\admin_setuserid.html'
+    Left = 381
+    Top = 628
+  end
+  object admin_changepassword: TPageProducer
+    HTMLFile = 'templates\admin_changepassword.html'
+    Left = 489
+    Top = 628
+  end
+  object admin_userauthorized: TPageProducer
+    HTMLFile = 'templates\admin_userauthorized.html'
+    Left = 613
+    Top = 628
+  end
+  object admin_userlog: TPageProducer
+    HTMLFile = 'templates\admin_userlog.html'
+    Left = 813
+    Top = 628
+  end
+  object admin_copyuser: TPageProducer
+    HTMLFile = 'templates\admin_copyuser.html'
+    Left = 721
+    Top = 628
   end
 end
